@@ -1,0 +1,21 @@
+{
+ "AppName": "eventstracker",
+ "GroupID": "me.sathish",
+ "ArtifactID": "eventstracker",
+ "AppVersion": "1.0.0-SNAPSHOT",
+ "BasePackage": "com.mycompany.myapp",
+ "BuildTool": "Maven",
+ "DbType": "PostgreSQL",
+ "DbMigrationTool": "Flyway",
+ "Features": [
+  "Spring Modulith",
+  "Thymeleaf",
+  "Security"
+ ],
+ "SpringModulithSupport": true,
+ "SpringCloudAWSSupport": false,
+ "ThymeleafSupport": true,
+ "HTMXSupport": false,
+ "SecuritySupport": true,
+ "JwtSecuritySupport": false
+}
