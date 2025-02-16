@@ -13,23 +13,23 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 class WebSecurityConfig {
     private static final String[] PUBLIC_RESOURCES = {
-            "/css/**",
-            "/js/**",
-            "/images/**",
-            "/webjars/**",
-            "/favicon.ico",
-            "/actuator/health/**",
-            "/actuator/info/**",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/error",
-            "/domain-events",
+        "/css/**",
+        "/js/**",
+        "/images/**",
+        "/webjars/**",
+        "/favicon.ico",
+        "/actuator/health/**",
+        "/actuator/info/**",
+        "/swagger-ui/**",
+        "/v3/api-docs/**",
+        "/error",
+        "/domain-events",
     };
 
     @Bean
     SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
         String[] unsecuredPaths = {
-                "/login",
+            "/login",
         };
         http.securityMatcher("/**");
 
@@ -40,7 +40,7 @@ class WebSecurityConfig {
                 .anyRequest()
                 .authenticated());
 
-//        http.formLogin(formLogin -> formLogin.loginPage("/login").permitAll());
+        //        http.formLogin(formLogin -> formLogin.loginPage("/login").permitAll());
         http.httpBasic(Customizer.withDefaults());
         http.csrf(CsrfConfigurer::disable);
         http.headers(headers -> headers.frameOptions().disable());

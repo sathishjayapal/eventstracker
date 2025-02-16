@@ -24,6 +24,6 @@ public class DomainDataServiceUtil {
                 new Domain("NIKE", "Inactive", "Nike domain related data"),
                 new Domain("APPLE", "Active", "Apple domain related data"));
 
-        domainRepo.saveAll(domainList);
+        domainRepo.persistAll(domainList);
     }
 }
