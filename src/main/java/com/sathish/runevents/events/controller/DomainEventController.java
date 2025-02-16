@@ -2,7 +2,6 @@ package com.sathish.runevents.events.controller;
 
 import com.sathish.runevents.events.data.DomainEventDTO;
 import com.sathish.runevents.events.service.DomainEventService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

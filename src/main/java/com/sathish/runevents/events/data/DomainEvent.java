@@ -6,15 +6,14 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "domain_events", schema = "runeventsprojectschema")
 @AttributeOverrides({
-        @AttributeOverride(name = "createdAt", column = @Column(name = "created_at", nullable = false)),
-        @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
+    @AttributeOverride(name = "createdAt", column = @Column(name = "created_at", nullable = false)),
+    @AttributeOverride(name = "updatedAt", column = @Column(name = "updated_at"))
 })
 public class DomainEvent extends BaseEvents {
     @Id
@@ -39,5 +38,4 @@ public class DomainEvent extends BaseEvents {
     @NotNull
     @Column(name = "payload", nullable = false, length = Integer.MAX_VALUE)
     private String payload;
-
 }
