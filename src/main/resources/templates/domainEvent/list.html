@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout}">
+    <head>
+        <title>[[#{domainEvent.list.headline}]]</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div class="d-flex flex-wrap mb-4">
+                <h1 class="flex-grow-1">[[#{domainEvent.list.headline}]]</h1>
+                <div>
+                    <a th:href="@{/domainEvents/add}" class="btn btn-primary ms-2">[[#{domainEvent.list.createNew}]]</a>
+                </div>
+            </div>
+            <div th:if="${domainEvents.empty}">[[#{domainEvent.list.empty}]]</div>
+            <div th:if="${!domainEvents.empty}" class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">[[#{domainEvent.id.label}]]</th>
+                            <th scope="col">[[#{domainEvent.createdAt.label}]]</th>
+                            <th scope="col">[[#{domainEvent.updatedAt.label}]]</th>
+                            <th scope="col">[[#{domainEvent.createdBy.label}]]</th>
+                            <th scope="col">[[#{domainEvent.updatedBy.label}]]</th>
+                            <th scope="col">[[#{domainEvent.domain.label}]]</th>
+                            <th><!-- --></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="domainEvent : ${domainEvents}">
+                            <td>[[${domainEvent.id}]]</td>
+                            <td>[[${domainEvent.createdAt}]]</td>
+                            <td>[[${domainEvent.updatedAt}]]</td>
+                            <td>[[${domainEvent.createdBy}]]</td>
+                            <td>[[${domainEvent.updatedBy}]]</td>
+                            <td>[[${domainEvent.domain}]]</td>
+                            <td>
+                                <div class="float-end text-nowrap">
+                                    <a th:href="@{/domainEvents/edit/{id}(id=${domainEvent.id})}" class="btn btn-sm btn-secondary">[[#{domainEvent.list.edit}]]</a>
+                                    <form th:action="@{/domainEvents/delete/{id}(id=${domainEvent.id})}"
+                                            th:data-confirm-message="#{delete.confirm}" method="post" class="js-submit-confirm d-inline">
+                                        <button type="submit" class="btn btn-sm btn-secondary">[[#{domainEvent.list.delete}]]</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+</html>
