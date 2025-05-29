@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout}">
+    <head>
+        <title>[[#{domainEvent.add.headline}]]</title>
+    </head>
+    <body>
+        <div layout:fragment="content">
+            <div class="d-flex flex-wrap mb-4">
+                <h1 class="flex-grow-1">[[#{domainEvent.add.headline}]]</h1>
+                <div>
+                    <a th:href="@{/domainEvents}" class="btn btn-secondary">[[#{domainEvent.add.back}]]</a>
+                </div>
+            </div>
+            <div th:replace="~{fragments/forms::globalErrors('domainEvent')}" />
+            <form th:action="${requestUri}" method="post" novalidate="">
+                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='eventId', required=true, type='textarea')}" />
+                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='eventType', required=true, type='textarea')}" />
+                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='payload', required=true, type='textarea')}" />
+                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='createdAt', required=true)}" />
+                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='updatedAt', required=true)}" />
+                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='createdBy', required=true)}" />
+                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='updatedBy', required=true)}" />
+                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='domain', type='select')}" />
+                <input type="submit" th:value="#{domainEvent.add.headline}" class="btn btn-primary mt-4" />
+            </form>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,26 @@
+CREATE SEQUENCE  IF NOT EXISTS primary_sequence START WITH 10000 INCREMENT BY 1;
+
+CREATE TABLE domain (
+    id BIGINT NOT NULL,
+    domain_name TEXT NOT NULL,
+    status TEXT NOT NULL,
+    comments TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE,
+    updated_at TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT domain_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE domain_event (
+    id BIGINT NOT NULL,
+    event_id TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    created_by VARCHAR(20) NOT NULL,
+    updated_by VARCHAR(20) NOT NULL,
+    domain_id BIGINT,
+    CONSTRAINT domain_event_pkey PRIMARY KEY (id)
+);
+
+ALTER TABLE domain_event ADD CONSTRAINT fk_domain_event_domain_id FOREIGN KEY (domain_id) REFERENCES domain (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
