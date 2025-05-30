@@ -9,7 +9,7 @@
         <relativePath /><!-- lookup parent from repository -->
     </parent>
     <groupId>me.sathish</groupId>
-    <artifactId>event-service</artifactId>
+    <artifactId>eventstracker</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>event-service</name>
 
