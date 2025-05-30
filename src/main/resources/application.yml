@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5432/event-service}
-    username: ${JDBC_DATABASE_USERNAME:postgres}
-    password: ${JDBC_DATABASE_PASSWORD:<<YOUR_PASSWORD>>}
+    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:6439/event-service}
+    username: ${JDBC_DATABASE_USERNAME:psqladmin}
+    password: ${JDBC_DATABASE_PASSWORD:psqladminpas$}
     hikari:
       connection-timeout: 30000
       maximum-pool-size: 10
