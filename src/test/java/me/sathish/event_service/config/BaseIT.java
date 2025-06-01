@@ -4,10 +4,12 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import lombok.SneakyThrows;
 import me.sathish.event_service.EventServiceApplication;
 import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.domain_event.DomainEventRepository;
+import me.sathish.event_service.event_domain_user.EventDomainUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -29,15 +31,16 @@ import org.testcontainers.containers.PostgreSQLContainer;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @ActiveProfiles("it")
-@Sql("/data/clearAll.sql")
+@Sql({"/data/clearAll.sql", "/data/eventDomainUserData.sql"})
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 public abstract class BaseIT {
 
     @ServiceConnection
     private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:17.5");
     public static final String AUTH_USER = "authUser";
+    public static final String ADMIN = "admin";
     public static final String PASSWORD = "Bootify!";
-    private static String eventserviceconfigSession = null;
+    private static final HashMap<String, String> eventserviceconfigSessions = new HashMap<>();
 
     static {
         postgreSQLContainer.withReuse(true)
@@ -53,6 +56,9 @@ public abstract class BaseIT {
     @Autowired
     public DomainEventRepository domainEventRepository;
 
+    @Autowired
+    public EventDomainUserRepository eventDomainUserRepository;
+
     @PostConstruct
     public void initRestAssured() {
         RestAssured.port = serverPort;
@@ -65,7 +71,8 @@ public abstract class BaseIT {
         return StreamUtils.copyToString(getClass().getResourceAsStream(resourceName), StandardCharsets.UTF_8);
     }
 
-    public String eventserviceconfigSession() {
+    public String eventserviceconfigSession(final String username) {
+        String eventserviceconfigSession = eventserviceconfigSessions.get(username);
         if (eventserviceconfigSession == null) {
             // init session
             eventserviceconfigSession = RestAssured
@@ -82,11 +89,12 @@ public abstract class BaseIT {
                         .csrf("/login")
                         .accept(ContentType.HTML)
                         .contentType(ContentType.URLENC)
-                        .formParam("login", AUTH_USER)
+                        .formParam("username", username)
                         .formParam("password", PASSWORD)
                     .when()
                         .post("/login")
                     .sessionId();
+            eventserviceconfigSessions.put(username, eventserviceconfigSession);
         }
         return eventserviceconfigSession;
     }
