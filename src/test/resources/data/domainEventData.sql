@@ -16,8 +16,8 @@ INSERT INTO domain_event (
     'Vel eros donec ac odio tempor orci.',
     '2024-09-02 14:30:00',
     '2024-09-02 14:30:00',
-    'Nec ullamcorper.',
-    'Viverra suspendisse.',
+    '2024-09-02 14:30:00',
+    '2024-09-02 14:30:00',
     '2024-09-02 14:30:00',
     '2024-09-02 14:30:00'
 );
@@ -40,8 +40,8 @@ INSERT INTO domain_event (
     'Nibh ipsum consequat nisl vel pretium lectus quam id.',
     '2024-09-03 14:30:00',
     '2024-09-03 14:30:00',
-    'Sed ut perspiciatis.',
-    'Nec ullamcorper.',
+    '2024-09-03 14:30:00',
+    '2024-09-03 14:30:00',
     '2024-09-03 14:30:00',
     '2024-09-03 14:30:00'
 );
