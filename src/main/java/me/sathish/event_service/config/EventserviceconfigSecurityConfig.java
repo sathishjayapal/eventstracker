@@ -40,7 +40,7 @@ public class EventserviceconfigSecurityConfig {
                     .loginPage("/login")
                     .failureUrl("/login?loginError=true"))
                 .logout(logout -> logout
-                    .logoutSuccessUrl("/login?logoutSuccess=true")
+                    .logoutSuccessUrl("/?logoutSuccess=true")
                     .deleteCookies("JSESSIONID"))
                 .exceptionHandling(exception -> exception
                     .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login?loginRequired=true")))

@@ -20,7 +20,7 @@ INSERT INTO event_domain_user (
     last_updated
 ) VALUES (
     1201,
-    'admin',
+    'Vel illum dolore.',
     '{bcrypt}$2a$10$FMzmOkkfbApEWxS.4XzCKOR7EbbiwzkPEyGgYh6uQiPxurkpzRMa6',
     '2024-09-03 14:30:00',
     '2024-09-03 14:30:00'

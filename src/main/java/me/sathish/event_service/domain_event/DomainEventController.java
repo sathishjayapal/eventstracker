@@ -21,7 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/domainEvents")
-@PreAuthorize("hasAnyAuthority('" + UserRoles.AUTH_USER + "', '" + UserRoles.ADMIN + "')")
+@PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
 public class DomainEventController {
 
     private final DomainEventService domainEventService;
