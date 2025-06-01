@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/api/domainEvents", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyAuthority('" + UserRoles.AUTH_USER + "', '" + UserRoles.ADMIN + "')")
+@PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
 public class DomainEventResource {
 
     private final DomainEventService domainEventService;
