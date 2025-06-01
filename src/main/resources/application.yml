@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:6439/event-service}
+    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:6433/event-service}
     username: ${JDBC_DATABASE_USERNAME:psqladmin}
     password: ${JDBC_DATABASE_PASSWORD:psqladminpas$}
     hikari:
@@ -39,3 +39,5 @@ management:
       show-details: always
 springdoc:
   pathsToMatch: /api/**
+server:
+  port: 9081
