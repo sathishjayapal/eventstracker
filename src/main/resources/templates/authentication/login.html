@@ -9,7 +9,7 @@
             <h1 class="mb-4">[[#{authentication.login.headline}]]</h1>
             <div th:replace="~{fragments/forms::globalErrors('authentication')}" />
             <form th:action="${requestUri}" method="post" novalidate="">
-                <div th:replace="~{fragments/forms::inputRow(object='authentication', field='login', required=true)}" />
+                <div th:replace="~{fragments/forms::inputRow(object='authentication', field='username', required=true)}" />
                 <div th:replace="~{fragments/forms::inputRow(object='authentication', field='password', required=true, type='password')}" />
                 <input type="submit" th:value="#{authentication.login.headline}" class="btn btn-primary mt-4" />
             </form>

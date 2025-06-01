@@ -38,10 +38,9 @@ public class EventserviceconfigSecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
                 .formLogin(form -> form
                     .loginPage("/login")
-                    .usernameParameter("login")
                     .failureUrl("/login?loginError=true"))
                 .logout(logout -> logout
-                    .logoutSuccessUrl("/?logoutSuccess=true")
+                    .logoutSuccessUrl("/login?logoutSuccess=true")
                     .deleteCookies("JSESSIONID"))
                 .exceptionHandling(exception -> exception
                     .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login?loginRequired=true")))

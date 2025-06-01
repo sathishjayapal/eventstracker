@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/api/domains", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
+@PreAuthorize("hasAnyAuthority('" + UserRoles.AUTH_USER + "', '" + UserRoles.ADMIN + "')")
 public class DomainResource {
 
     private final DomainService domainService;

@@ -18,7 +18,7 @@ public class DomainEventResourceTest extends BaseIT {
     void getAllDomainEvents_success() {
         RestAssured
                 .given()
-                    .sessionId(eventserviceconfigSession())
+                    .sessionId(eventserviceconfigSession(AUTH_USER))
                     .accept(ContentType.JSON)
                 .when()
                     .get("/api/domainEvents")
@@ -33,7 +33,7 @@ public class DomainEventResourceTest extends BaseIT {
     void getDomainEvent_success() {
         RestAssured
                 .given()
-                    .sessionId(eventserviceconfigSession())
+                    .sessionId(eventserviceconfigSession(AUTH_USER))
                     .accept(ContentType.JSON)
                 .when()
                     .get("/api/domainEvents/1100")
@@ -46,7 +46,7 @@ public class DomainEventResourceTest extends BaseIT {
     void getDomainEvent_notFound() {
         RestAssured
                 .given()
-                    .sessionId(eventserviceconfigSession())
+                    .sessionId(eventserviceconfigSession(AUTH_USER))
                     .accept(ContentType.JSON)
                 .when()
                     .get("/api/domainEvents/1766")
@@ -59,7 +59,7 @@ public class DomainEventResourceTest extends BaseIT {
     void createDomainEvent_success() {
         RestAssured
                 .given()
-                    .sessionId(eventserviceconfigSession())
+                    .sessionId(eventserviceconfigSession(AUTH_USER))
                     .accept(ContentType.JSON)
                     .contentType(ContentType.JSON)
                     .body(readResource("/requests/domainEventDTORequest.json"))
@@ -74,7 +74,7 @@ public class DomainEventResourceTest extends BaseIT {
     void createDomainEvent_missingField() {
         RestAssured
                 .given()
-                    .sessionId(eventserviceconfigSession())
+                    .sessionId(eventserviceconfigSession(AUTH_USER))
                     .accept(ContentType.JSON)
                     .contentType(ContentType.JSON)
                     .body(readResource("/requests/domainEventDTORequest_missingField.json"))
@@ -92,7 +92,7 @@ public class DomainEventResourceTest extends BaseIT {
     void updateDomainEvent_success() {
         RestAssured
                 .given()
-                    .sessionId(eventserviceconfigSession())
+                    .sessionId(eventserviceconfigSession(AUTH_USER))
                     .accept(ContentType.JSON)
                     .contentType(ContentType.JSON)
                     .body(readResource("/requests/domainEventDTORequest.json"))
@@ -109,7 +109,7 @@ public class DomainEventResourceTest extends BaseIT {
     void deleteDomainEvent_success() {
         RestAssured
                 .given()
-                    .sessionId(eventserviceconfigSession())
+                    .sessionId(eventserviceconfigSession(AUTH_USER))
                     .accept(ContentType.JSON)
                 .when()
                     .delete("/api/domainEvents/1100")
