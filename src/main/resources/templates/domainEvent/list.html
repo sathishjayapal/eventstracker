@@ -18,8 +18,6 @@
                     <thead>
                         <tr>
                             <th scope="col">[[#{domainEvent.id.label}]]</th>
-                            <th scope="col">[[#{domainEvent.createdAt.label}]]</th>
-                            <th scope="col">[[#{domainEvent.updatedAt.label}]]</th>
                             <th scope="col">[[#{domainEvent.createdBy.label}]]</th>
                             <th scope="col">[[#{domainEvent.updatedBy.label}]]</th>
                             <th scope="col">[[#{domainEvent.domain.label}]]</th>
@@ -29,8 +27,6 @@
                     <tbody>
                         <tr th:each="domainEvent : ${domainEvents}">
                             <td>[[${domainEvent.id}]]</td>
-                            <td>[[${domainEvent.createdAt}]]</td>
-                            <td>[[${domainEvent.updatedAt}]]</td>
                             <td>[[${domainEvent.createdBy}]]</td>
                             <td>[[${domainEvent.updatedBy}]]</td>
                             <td>[[${domainEvent.domain}]]</td>

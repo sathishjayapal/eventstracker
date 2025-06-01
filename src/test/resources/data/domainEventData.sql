@@ -3,8 +3,6 @@ INSERT INTO domain_event (
     event_id,
     event_type,
     payload,
-    created_at,
-    updated_at,
     created_by,
     updated_by,
     date_created,
@@ -14,10 +12,8 @@ INSERT INTO domain_event (
     'Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.',
     'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.',
     'Vel eros donec ac odio tempor orci.',
-    '2024-09-02 14:30:00',
-    '2024-09-02 14:30:00',
-    '2024-09-02 14:30:00',
-    '2024-09-02 14:30:00',
+    'Nec ullamcorper.',
+    'Viverra suspendisse.',
     '2024-09-02 14:30:00',
     '2024-09-02 14:30:00'
 );
@@ -27,8 +23,6 @@ INSERT INTO domain_event (
     event_id,
     event_type,
     payload,
-    created_at,
-    updated_at,
     created_by,
     updated_by,
     date_created,
@@ -38,10 +32,8 @@ INSERT INTO domain_event (
     'Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum.',
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     'Nibh ipsum consequat nisl vel pretium lectus quam id.',
-    '2024-09-03 14:30:00',
-    '2024-09-03 14:30:00',
-    '2024-09-03 14:30:00',
-    '2024-09-03 14:30:00',
+    'Sed ut perspiciatis.',
+    'Nec ullamcorper.',
     '2024-09-03 14:30:00',
     '2024-09-03 14:30:00'
 );

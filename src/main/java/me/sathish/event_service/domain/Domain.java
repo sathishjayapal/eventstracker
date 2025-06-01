@@ -47,12 +47,6 @@ public class Domain {
     @Column(columnDefinition = "text")
     private String comments;
 
-    @Column
-    private OffsetDateTime createdAt;
-
-    @Column
-    private OffsetDateTime updatedAt;
-
     @OneToMany(mappedBy = "domain")
     private Set<DomainEvent> domainEvents;
 

@@ -18,16 +18,12 @@
                     <thead>
                         <tr>
                             <th scope="col">[[#{domain.id.label}]]</th>
-                            <th scope="col">[[#{domain.createdAt.label}]]</th>
-                            <th scope="col">[[#{domain.updatedAt.label}]]</th>
                             <th><!-- --></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="domain : ${domains}">
                             <td>[[${domain.id}]]</td>
-                            <td>[[${domain.createdAt}]]</td>
-                            <td>[[${domain.updatedAt}]]</td>
                             <td>
                                 <div class="float-end text-nowrap">
                                     <a th:href="@{/domains/edit/{id}(id=${domain.id})}" class="btn btn-sm btn-secondary">[[#{domain.list.edit}]]</a>

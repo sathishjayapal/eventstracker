@@ -1,10 +1,8 @@
 package me.sathish.event_service.domain;
 
 import jakarta.validation.constraints.NotNull;
-import java.time.OffsetDateTime;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
 
 
 @Getter
@@ -20,11 +18,5 @@ public class DomainDTO {
     private String status;
 
     private String comments;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-    private OffsetDateTime createdAt;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
-    private OffsetDateTime updatedAt;
 
 }
