@@ -54,11 +54,11 @@ public class DomainEvent {
     @Column(nullable = false)
     private OffsetDateTime updatedAt;
 
-    @Column(nullable = false, length = 20)
-    private String createdBy;
+    @Column(nullable = false)
+    private OffsetDateTime createdBy;
 
-    @Column(nullable = false, length = 20)
-    private String updatedBy;
+    @Column(nullable = false)
+    private OffsetDateTime updatedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "domain_id")
