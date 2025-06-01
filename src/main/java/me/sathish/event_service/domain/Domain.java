@@ -2,6 +2,7 @@ package me.sathish.event_service.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,9 +13,13 @@ import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import me.sathish.event_service.domain_event.DomainEvent;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 public class Domain {
@@ -42,13 +47,15 @@ public class Domain {
     @Column(columnDefinition = "text")
     private String comments;
 
-    @Column
-    private OffsetDateTime createdAt;
-
-    @Column
-    private OffsetDateTime updatedAt;
-
     @OneToMany(mappedBy = "domain")
     private Set<DomainEvent> domainEvents;
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private OffsetDateTime dateCreated;
+
+    @LastModifiedDate
+    @Column(nullable = false)
+    private OffsetDateTime lastUpdated;
 
 }

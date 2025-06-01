@@ -3,8 +3,8 @@ INSERT INTO domain (
     domain_name,
     status,
     comments,
-    created_at,
-    updated_at
+    date_created,
+    last_updated
 ) VALUES (
     1000,
     'Donec pretium vulputate sapien nec sagittis aliquam malesuada.',
@@ -19,8 +19,8 @@ INSERT INTO domain (
     domain_name,
     status,
     comments,
-    created_at,
-    updated_at
+    date_created,
+    last_updated
 ) VALUES (
     1001,
     'Duis ultricies lacus sed turpis tincidunt.',

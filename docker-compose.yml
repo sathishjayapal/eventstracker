@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: postgres:17.5
+    environment:
+    - POSTGRES_DB=event-service
+    - POSTGRES_USER=psqladmin
+    - POSTGRES_PASSWORD=psqladminpas$
+    ports:
+    - 6433:5432
