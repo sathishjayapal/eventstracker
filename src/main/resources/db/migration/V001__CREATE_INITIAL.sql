@@ -27,4 +27,15 @@ CREATE TABLE domain_event (
     CONSTRAINT domain_event_pkey PRIMARY KEY (id)
 );
 
+CREATE TABLE event_domain_user (
+    id BIGINT NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    hash VARCHAR(255) NOT NULL,
+    date_created TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    last_updated TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT event_domain_user_pkey PRIMARY KEY (id)
+);
+
 ALTER TABLE domain_event ADD CONSTRAINT fk_domain_event_domain_id FOREIGN KEY (domain_id) REFERENCES domain (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE event_domain_user ADD CONSTRAINT unique_event_domain_user_username UNIQUE (username);
