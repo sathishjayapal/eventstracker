@@ -3,11 +3,13 @@ package me.sathish.event_service.domain;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
+import me.sathish.event_service.security.UserRoles;
 import me.sathish.event_service.util.ReferencedException;
 import me.sathish.event_service.util.ReferencedWarning;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/api/domains", produces = MediaType.APPLICATION_JSON_VALUE)
+@PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
 public class DomainResource {
 
     private final DomainService domainService;
