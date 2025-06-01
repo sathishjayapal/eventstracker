@@ -1,8 +1,10 @@
 package me.sathish.event_service.domain;
 
 import jakarta.validation.Valid;
+import me.sathish.event_service.security.UserRoles;
 import me.sathish.event_service.util.ReferencedWarning;
 import me.sathish.event_service.util.WebUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/domains")
+@PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
 public class DomainController {
 
     private final DomainService domainService;
