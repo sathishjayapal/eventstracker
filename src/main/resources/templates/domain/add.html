@@ -17,8 +17,6 @@
                 <div th:replace="~{fragments/forms::inputRow(object='domain', field='domainName', required=true, type='textarea')}" />
                 <div th:replace="~{fragments/forms::inputRow(object='domain', field='status', required=true, type='textarea')}" />
                 <div th:replace="~{fragments/forms::inputRow(object='domain', field='comments', type='textarea')}" />
-                <div th:replace="~{fragments/forms::inputRow(object='domain', field='createdAt')}" />
-                <div th:replace="~{fragments/forms::inputRow(object='domain', field='updatedAt')}" />
                 <input type="submit" th:value="#{domain.add.headline}" class="btn btn-primary mt-4" />
             </form>
         </div>
