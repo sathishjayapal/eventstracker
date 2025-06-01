@@ -7,6 +7,8 @@ CREATE TABLE domain (
     comments TEXT,
     created_at TIMESTAMP WITHOUT TIME ZONE,
     updated_at TIMESTAMP WITHOUT TIME ZONE,
+    date_created TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    last_updated TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT domain_pkey PRIMARY KEY (id)
 );
 
@@ -20,6 +22,8 @@ CREATE TABLE domain_event (
     created_by VARCHAR(20) NOT NULL,
     updated_by VARCHAR(20) NOT NULL,
     domain_id BIGINT,
+    date_created TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    last_updated TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT domain_event_pkey PRIMARY KEY (id)
 );
 
