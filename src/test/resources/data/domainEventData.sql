@@ -6,7 +6,9 @@ INSERT INTO domain_event (
     created_at,
     updated_at,
     created_by,
-    updated_by
+    updated_by,
+    date_created,
+    last_updated
 ) VALUES (
     1100,
     'Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.',
@@ -15,7 +17,9 @@ INSERT INTO domain_event (
     '2024-09-02 14:30:00',
     '2024-09-02 14:30:00',
     'Nec ullamcorper.',
-    'Viverra suspendisse.'
+    'Viverra suspendisse.',
+    '2024-09-02 14:30:00',
+    '2024-09-02 14:30:00'
 );
 
 INSERT INTO domain_event (
@@ -26,7 +30,9 @@ INSERT INTO domain_event (
     created_at,
     updated_at,
     created_by,
-    updated_by
+    updated_by,
+    date_created,
+    last_updated
 ) VALUES (
     1101,
     'Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum.',
@@ -35,5 +41,7 @@ INSERT INTO domain_event (
     '2024-09-03 14:30:00',
     '2024-09-03 14:30:00',
     'Sed ut perspiciatis.',
-    'Nec ullamcorper.'
+    'Nec ullamcorper.',
+    '2024-09-03 14:30:00',
+    '2024-09-03 14:30:00'
 );
