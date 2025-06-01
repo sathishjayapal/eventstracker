@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:6439/event-service}
+    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:6433/event-service}
     username: ${JDBC_DATABASE_USERNAME:psqladmin}
     password: ${JDBC_DATABASE_PASSWORD:psqladminpas$}
     hikari:
@@ -17,6 +17,9 @@ spring:
             non_contextual_creation: true
         id:
           new_generator_mappings: true
+  docker:
+    compose:
+      lifecycle-management: start-only
 error:
   handling:
     http-status-in-json-response: true
@@ -24,6 +27,8 @@ error:
     full-stacktrace-http-statuses: 5xx
     log-levels:
       5xx: ERROR
+    http-statuses:
+      org.springframework.security.authorization.AuthorizationDeniedException: unauthorized
 management:
   endpoints:
     web:
@@ -34,3 +39,5 @@ management:
       show-details: always
 springdoc:
   pathsToMatch: /api/**
+server:
+  port: 9081

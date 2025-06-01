@@ -1,12 +1,14 @@
 package me.sathish.event_service.config;
 
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import lombok.SneakyThrows;
 import me.sathish.event_service.EventServiceApplication;
 import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.domain_event.DomainEventRepository;
+import me.sathish.event_service.event_domain_user.EventDomainUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -28,12 +30,15 @@ import org.testcontainers.containers.PostgreSQLContainer;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @ActiveProfiles("it")
-@Sql("/data/clearAll.sql")
+@Sql({"/data/clearAll.sql", "/data/eventDomainUserData.sql"})
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 public abstract class BaseIT {
 
     @ServiceConnection
-    private static final PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:17.5");
+    private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:17.5");
+    public static final String AUTH_USER = "authUser";
+    public static final String PASSWORD = "Bootify!";
+    private static String eventserviceconfigSession = null;
 
     static {
         postgreSQLContainer.withReuse(true)
@@ -49,6 +54,9 @@ public abstract class BaseIT {
     @Autowired
     public DomainEventRepository domainEventRepository;
 
+    @Autowired
+    public EventDomainUserRepository eventDomainUserRepository;
+
     @PostConstruct
     public void initRestAssured() {
         RestAssured.port = serverPort;
@@ -59,6 +67,32 @@ public abstract class BaseIT {
     @SneakyThrows
     public String readResource(final String resourceName) {
         return StreamUtils.copyToString(getClass().getResourceAsStream(resourceName), StandardCharsets.UTF_8);
+    }
+
+    public String eventserviceconfigSession() {
+        if (eventserviceconfigSession == null) {
+            // init session
+            eventserviceconfigSession = RestAssured
+                    .given()
+                        .accept(ContentType.HTML)
+                    .when()
+                        .get("/login")
+                    .sessionId();
+
+            // perform login
+            eventserviceconfigSession = RestAssured
+                    .given()
+                        .sessionId(eventserviceconfigSession)
+                        .csrf("/login")
+                        .accept(ContentType.HTML)
+                        .contentType(ContentType.URLENC)
+                        .formParam("username", AUTH_USER)
+                        .formParam("password", PASSWORD)
+                    .when()
+                        .post("/login")
+                    .sessionId();
+        }
+        return eventserviceconfigSession;
     }
 
 }
