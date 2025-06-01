@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+            xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head>
         <title layout:title-pattern="$CONTENT_TITLE | $LAYOUT_TITLE">[[#{app.title}]]</title>
         <meta charset="utf-8" />
@@ -34,6 +35,12 @@
                                     <li><a th:href="@{/domains}" class="dropdown-item">[[#{domain.list.headline}]]</a></li>
                                     <li><a th:href="@{/domainEvents}" class="dropdown-item">[[#{domainEvent.list.headline}]]</a></li>
                                 </ul>
+                            </li>
+                            <li class="navbar-item">
+                                <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="nav-link">[[#{navigation.login}]]</a>
+                                <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="nav-link">
+                                    <input th:value="#{navigation.logout}" type="submit" class="unset" />
+                                </form>
                             </li>
                         </ul>
                     </div>

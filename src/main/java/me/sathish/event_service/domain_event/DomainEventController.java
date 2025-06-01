@@ -3,9 +3,11 @@ package me.sathish.event_service.domain_event;
 import jakarta.validation.Valid;
 import me.sathish.event_service.domain.Domain;
 import me.sathish.event_service.domain.DomainRepository;
+import me.sathish.event_service.security.UserRoles;
 import me.sathish.event_service.util.CustomCollectors;
 import me.sathish.event_service.util.WebUtils;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/domainEvents")
+@PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
 public class DomainEventController {
 
     private final DomainEventService domainEventService;

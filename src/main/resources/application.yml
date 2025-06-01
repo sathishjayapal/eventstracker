@@ -27,6 +27,8 @@ error:
     full-stacktrace-http-statuses: 5xx
     log-levels:
       5xx: ERROR
+    http-statuses:
+      org.springframework.security.authorization.AuthorizationDeniedException: unauthorized
 management:
   endpoints:
     web:
