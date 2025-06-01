@@ -28,7 +28,7 @@ public class EventserviceconfigUserDetailsService implements UserDetailsService 
             log.warn("user not found: {}", username);
             throw new UsernameNotFoundException("User " + username + " not found");
         }
-        final String role = UserRoles.AUTH_USER;
+        final String role = "sathishadmin".equals(username) ? UserRoles.ADMIN : UserRoles.AUTH_USER;
         final List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
         return new EventserviceconfigUserDetails(eventDomainUser.getId(), username, eventDomainUser.getHash(), authorities);
     }

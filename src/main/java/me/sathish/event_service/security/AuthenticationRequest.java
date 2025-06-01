@@ -11,11 +11,11 @@ import lombok.Setter;
 public class AuthenticationRequest {
 
     @NotNull
-    @Size(max = 255)
+    @Size(max = 50)
     private String username;
 
     @NotNull
-    @Size(max = 72)
+    @Size(max = 50)
     private String password;
 
 }
