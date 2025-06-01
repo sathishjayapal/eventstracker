@@ -4,7 +4,6 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import lombok.SneakyThrows;
 import me.sathish.event_service.EventServiceApplication;
 import me.sathish.event_service.domain.DomainRepository;
@@ -38,9 +37,8 @@ public abstract class BaseIT {
     @ServiceConnection
     private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:17.5");
     public static final String AUTH_USER = "authUser";
-    public static final String ADMIN = "admin";
     public static final String PASSWORD = "Bootify!";
-    private static final HashMap<String, String> eventserviceconfigSessions = new HashMap<>();
+    private static String eventserviceconfigSession = null;
 
     static {
         postgreSQLContainer.withReuse(true)
@@ -71,8 +69,7 @@ public abstract class BaseIT {
         return StreamUtils.copyToString(getClass().getResourceAsStream(resourceName), StandardCharsets.UTF_8);
     }
 
-    public String eventserviceconfigSession(final String username) {
-        String eventserviceconfigSession = eventserviceconfigSessions.get(username);
+    public String eventserviceconfigSession() {
         if (eventserviceconfigSession == null) {
             // init session
             eventserviceconfigSession = RestAssured
@@ -89,12 +86,11 @@ public abstract class BaseIT {
                         .csrf("/login")
                         .accept(ContentType.HTML)
                         .contentType(ContentType.URLENC)
-                        .formParam("username", username)
+                        .formParam("username", AUTH_USER)
                         .formParam("password", PASSWORD)
                     .when()
                         .post("/login")
                     .sessionId();
-            eventserviceconfigSessions.put(username, eventserviceconfigSession);
         }
         return eventserviceconfigSession;
     }
