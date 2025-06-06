@@ -27,7 +27,6 @@ public class EventDomainUserDataLoader implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        System.out.println("The username is: " + environment.getProperty("loginusername"));
 
         if (eventDomainUserRepository.findByUsernameIgnoreCase(environment.getProperty("eventDomainUser")) != null) {
             System.out.println("Event Domain User already exists");
