@@ -6,16 +6,11 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
-
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE
-)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface DomainMapper {
 
     DomainDTO updateDomainDTO(Domain domain, @MappingTarget DomainDTO domainDTO);
 
     @Mapping(target = "id", ignore = true)
     Domain updateDomain(DomainDTO domainDTO, @MappingTarget Domain domain);
-
 }

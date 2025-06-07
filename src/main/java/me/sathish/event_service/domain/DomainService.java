@@ -8,7 +8,6 @@ import me.sathish.event_service.util.ReferencedWarning;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-
 @Service
 public class DomainService {
 
@@ -16,7 +15,9 @@ public class DomainService {
     private final DomainMapper domainMapper;
     private final DomainEventRepository domainEventRepository;
 
-    public DomainService(final DomainRepository domainRepository, final DomainMapper domainMapper,
+    public DomainService(
+            final DomainRepository domainRepository,
+            final DomainMapper domainMapper,
             final DomainEventRepository domainEventRepository) {
         this.domainRepository = domainRepository;
         this.domainMapper = domainMapper;
@@ -31,7 +32,8 @@ public class DomainService {
     }
 
     public DomainDTO get(final Long id) {
-        return domainRepository.findById(id)
+        return domainRepository
+                .findById(id)
                 .map(domain -> domainMapper.updateDomainDTO(domain, new DomainDTO()))
                 .orElseThrow(NotFoundException::new);
     }
@@ -43,8 +45,7 @@ public class DomainService {
     }
 
     public void update(final Long id, final DomainDTO domainDTO) {
-        final Domain domain = domainRepository.findById(id)
-                .orElseThrow(NotFoundException::new);
+        final Domain domain = domainRepository.findById(id).orElseThrow(NotFoundException::new);
         domainMapper.updateDomain(domainDTO, domain);
         domainRepository.save(domain);
     }
@@ -55,8 +56,7 @@ public class DomainService {
 
     public ReferencedWarning getReferencedWarning(final Long id) {
         final ReferencedWarning referencedWarning = new ReferencedWarning();
-        final Domain domain = domainRepository.findById(id)
-                .orElseThrow(NotFoundException::new);
+        final Domain domain = domainRepository.findById(id).orElseThrow(NotFoundException::new);
         final DomainEvent domainDomainEvent = domainEventRepository.findFirstByDomain(domain);
         if (domainDomainEvent != null) {
             referencedWarning.setKey("domain.domainEvent.domain.referenced");
@@ -65,5 +65,4 @@ public class DomainService {
         }
         return null;
     }
-
 }

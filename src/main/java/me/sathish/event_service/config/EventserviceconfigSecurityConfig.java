@@ -8,15 +8,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-
 
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
@@ -29,26 +24,21 @@ public class EventserviceconfigSecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
-            final AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(final AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
-    public SecurityFilterChain eventserviceconfigFilterChain(final HttpSecurity http) throws
-            Exception {
+    public SecurityFilterChain eventserviceconfigFilterChain(final HttpSecurity http) throws Exception {
         return http.cors(withDefaults())
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/actuator/**"))
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
-                .formLogin(form -> form
-                    .loginPage("/login")
-                    .failureUrl("/login?loginError=true"))
-                .logout(logout -> logout
-                    .logoutSuccessUrl("/?logoutSuccess=true")
-                    .deleteCookies("JSESSIONID"))
-                .exceptionHandling(exception -> exception
-                    .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login?loginRequired=true")))
+                .formLogin(form -> form.loginPage("/login").failureUrl("/login?loginError=true"))
+                .logout(logout ->
+                        logout.logoutSuccessUrl("/?logoutSuccess=true").deleteCookies("JSESSIONID"))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(
+                        new LoginUrlAuthenticationEntryPoint("/login?loginRequired=true")))
                 .build();
     }
-
 }

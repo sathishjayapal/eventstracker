@@ -9,15 +9,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-
 @Service
 @Slf4j
 public class EventserviceconfigUserDetailsService implements UserDetailsService {
 
     private final EventDomainUserRepository eventDomainUserRepository;
 
-    public EventserviceconfigUserDetailsService(
-            final EventDomainUserRepository eventDomainUserRepository) {
+    public EventserviceconfigUserDetailsService(final EventDomainUserRepository eventDomainUserRepository) {
         this.eventDomainUserRepository = eventDomainUserRepository;
     }
 
@@ -30,7 +28,7 @@ public class EventserviceconfigUserDetailsService implements UserDetailsService 
         }
         final String role = "sathishadmin".equals(username) ? UserRoles.ADMIN : UserRoles.AUTH_USER;
         final List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
-        return new EventserviceconfigUserDetails(eventDomainUser.getId(), username, eventDomainUser.getHash(), authorities);
+        return new EventserviceconfigUserDetails(
+                eventDomainUser.getId(), username, eventDomainUser.getHash(), authorities);
     }
-
 }

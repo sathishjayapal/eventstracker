@@ -6,7 +6,6 @@ import me.sathish.event_service.util.NotFoundException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-
 @Service
 public class DomainEventService {
 
@@ -14,8 +13,10 @@ public class DomainEventService {
     private final DomainRepository domainRepository;
     private final DomainEventMapper domainEventMapper;
 
-    public DomainEventService(final DomainEventRepository domainEventRepository,
-            final DomainRepository domainRepository, final DomainEventMapper domainEventMapper) {
+    public DomainEventService(
+            final DomainEventRepository domainEventRepository,
+            final DomainRepository domainRepository,
+            final DomainEventMapper domainEventMapper) {
         this.domainEventRepository = domainEventRepository;
         this.domainRepository = domainRepository;
         this.domainEventMapper = domainEventMapper;
@@ -29,7 +30,8 @@ public class DomainEventService {
     }
 
     public DomainEventDTO get(final Long id) {
-        return domainEventRepository.findById(id)
+        return domainEventRepository
+                .findById(id)
                 .map(domainEvent -> domainEventMapper.updateDomainEventDTO(domainEvent, new DomainEventDTO()))
                 .orElseThrow(NotFoundException::new);
     }
@@ -41,8 +43,7 @@ public class DomainEventService {
     }
 
     public void update(final Long id, final DomainEventDTO domainEventDTO) {
-        final DomainEvent domainEvent = domainEventRepository.findById(id)
-                .orElseThrow(NotFoundException::new);
+        final DomainEvent domainEvent = domainEventRepository.findById(id).orElseThrow(NotFoundException::new);
         domainEventMapper.updateDomainEvent(domainEventDTO, domainEvent, domainRepository);
         domainEventRepository.save(domainEvent);
     }
@@ -50,5 +51,4 @@ public class DomainEventService {
     public void delete(final Long id) {
         domainEventRepository.deleteById(id);
     }
-
 }

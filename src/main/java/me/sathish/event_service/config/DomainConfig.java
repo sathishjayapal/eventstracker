@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-
 @Configuration
 @EntityScan("me.sathish.event_service")
 @EnableJpaRepositories("me.sathish.event_service")
@@ -22,5 +21,4 @@ public class DomainConfig {
     public DateTimeProvider dateTimeProvider() {
         return () -> Optional.of(OffsetDateTime.now());
     }
-
 }
