@@ -10,112 +10,108 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 
-
 public class DomainEventResourceTest extends BaseIT {
 
     @Test
     @Sql("/data/domainEventData.sql")
     void getAllDomainEvents_success() {
-        RestAssured
-                .given()
-                    .sessionId(eventserviceconfigSession())
-                    .accept(ContentType.JSON)
+        RestAssured.given()
+                .sessionId(eventserviceconfigSession())
+                .accept(ContentType.JSON)
                 .when()
-                    .get("/api/domainEvents")
+                .get("/api/domainEvents")
                 .then()
-                    .statusCode(HttpStatus.OK.value())
-                    .body("size()", Matchers.equalTo(2))
-                    .body("get(0).id", Matchers.equalTo(1100));
+                .statusCode(HttpStatus.OK.value())
+                .body("size()", Matchers.equalTo(2))
+                .body("get(0).id", Matchers.equalTo(1100));
     }
 
     @Test
     @Sql("/data/domainEventData.sql")
     void getDomainEvent_success() {
-        RestAssured
-                .given()
-                    .sessionId(eventserviceconfigSession())
-                    .accept(ContentType.JSON)
+        RestAssured.given()
+                .sessionId(eventserviceconfigSession())
+                .accept(ContentType.JSON)
                 .when()
-                    .get("/api/domainEvents/1100")
+                .get("/api/domainEvents/1100")
                 .then()
-                    .statusCode(HttpStatus.OK.value())
-                    .body("eventId", Matchers.equalTo("Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat."));
+                .statusCode(HttpStatus.OK.value())
+                .body(
+                        "eventId",
+                        Matchers.equalTo(
+                                "Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat."));
     }
 
     @Test
     void getDomainEvent_notFound() {
-        RestAssured
-                .given()
-                    .sessionId(eventserviceconfigSession())
-                    .accept(ContentType.JSON)
+        RestAssured.given()
+                .sessionId(eventserviceconfigSession())
+                .accept(ContentType.JSON)
                 .when()
-                    .get("/api/domainEvents/1766")
+                .get("/api/domainEvents/1766")
                 .then()
-                    .statusCode(HttpStatus.NOT_FOUND.value())
-                    .body("code", Matchers.equalTo("NOT_FOUND"));
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .body("code", Matchers.equalTo("NOT_FOUND"));
     }
 
     @Test
     void createDomainEvent_success() {
-        RestAssured
-                .given()
-                    .sessionId(eventserviceconfigSession())
-                    .accept(ContentType.JSON)
-                    .contentType(ContentType.JSON)
-                    .body(readResource("/requests/domainEventDTORequest.json"))
+        RestAssured.given()
+                .sessionId(eventserviceconfigSession())
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .body(readResource("/requests/domainEventDTORequest.json"))
                 .when()
-                    .post("/api/domainEvents")
+                .post("/api/domainEvents")
                 .then()
-                    .statusCode(HttpStatus.CREATED.value());
+                .statusCode(HttpStatus.CREATED.value());
         assertEquals(1, domainEventRepository.count());
     }
 
     @Test
     void createDomainEvent_missingField() {
-        RestAssured
-                .given()
-                    .sessionId(eventserviceconfigSession())
-                    .accept(ContentType.JSON)
-                    .contentType(ContentType.JSON)
-                    .body(readResource("/requests/domainEventDTORequest_missingField.json"))
+        RestAssured.given()
+                .sessionId(eventserviceconfigSession())
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .body(readResource("/requests/domainEventDTORequest_missingField.json"))
                 .when()
-                    .post("/api/domainEvents")
+                .post("/api/domainEvents")
                 .then()
-                    .statusCode(HttpStatus.BAD_REQUEST.value())
-                    .body("code", Matchers.equalTo("VALIDATION_FAILED"))
-                    .body("fieldErrors.get(0).property", Matchers.equalTo("eventId"))
-                    .body("fieldErrors.get(0).code", Matchers.equalTo("REQUIRED_NOT_NULL"));
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("code", Matchers.equalTo("VALIDATION_FAILED"))
+                .body("fieldErrors.get(0).property", Matchers.equalTo("eventId"))
+                .body("fieldErrors.get(0).code", Matchers.equalTo("REQUIRED_NOT_NULL"));
     }
 
     @Test
     @Sql("/data/domainEventData.sql")
     void updateDomainEvent_success() {
-        RestAssured
-                .given()
-                    .sessionId(eventserviceconfigSession())
-                    .accept(ContentType.JSON)
-                    .contentType(ContentType.JSON)
-                    .body(readResource("/requests/domainEventDTORequest.json"))
+        RestAssured.given()
+                .sessionId(eventserviceconfigSession())
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .body(readResource("/requests/domainEventDTORequest.json"))
                 .when()
-                    .put("/api/domainEvents/1100")
+                .put("/api/domainEvents/1100")
                 .then()
-                    .statusCode(HttpStatus.OK.value());
-        assertEquals("Vel eros donec ac odio tempor orci.", domainEventRepository.findById(((long)1100)).orElseThrow().getEventId());
+                .statusCode(HttpStatus.OK.value());
+        assertEquals(
+                "Vel eros donec ac odio tempor orci.",
+                domainEventRepository.findById(((long) 1100)).orElseThrow().getEventId());
         assertEquals(2, domainEventRepository.count());
     }
 
     @Test
     @Sql("/data/domainEventData.sql")
     void deleteDomainEvent_success() {
-        RestAssured
-                .given()
-                    .sessionId(eventserviceconfigSession())
-                    .accept(ContentType.JSON)
+        RestAssured.given()
+                .sessionId(eventserviceconfigSession())
+                .accept(ContentType.JSON)
                 .when()
-                    .delete("/api/domainEvents/1100")
+                .delete("/api/domainEvents/1100")
                 .then()
-                    .statusCode(HttpStatus.NO_CONTENT.value());
+                .statusCode(HttpStatus.NO_CONTENT.value());
         assertEquals(1, domainEventRepository.count());
     }
-
 }

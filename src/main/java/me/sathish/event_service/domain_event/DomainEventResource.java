@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RestController
 @RequestMapping(value = "/api/domainEvents", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
@@ -41,15 +40,14 @@ public class DomainEventResource {
 
     @PostMapping
     @ApiResponse(responseCode = "201")
-    public ResponseEntity<Long> createDomainEvent(
-            @RequestBody @Valid final DomainEventDTO domainEventDTO) {
+    public ResponseEntity<Long> createDomainEvent(@RequestBody @Valid final DomainEventDTO domainEventDTO) {
         final Long createdId = domainEventService.create(domainEventDTO);
         return new ResponseEntity<>(createdId, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Long> updateDomainEvent(@PathVariable(name = "id") final Long id,
-            @RequestBody @Valid final DomainEventDTO domainEventDTO) {
+    public ResponseEntity<Long> updateDomainEvent(
+            @PathVariable(name = "id") final Long id, @RequestBody @Valid final DomainEventDTO domainEventDTO) {
         domainEventService.update(id, domainEventDTO);
         return ResponseEntity.ok(id);
     }
@@ -60,5 +58,4 @@ public class DomainEventResource {
         domainEventService.delete(id);
         return ResponseEntity.noContent().build();
     }
-
 }

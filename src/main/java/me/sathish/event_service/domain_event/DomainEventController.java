@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
 @Controller
 @RequestMapping("/domainEvents")
 @PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
@@ -27,17 +26,17 @@ public class DomainEventController {
     private final DomainEventService domainEventService;
     private final DomainRepository domainRepository;
 
-    public DomainEventController(final DomainEventService domainEventService,
-            final DomainRepository domainRepository) {
+    public DomainEventController(final DomainEventService domainEventService, final DomainRepository domainRepository) {
         this.domainEventService = domainEventService;
         this.domainRepository = domainRepository;
     }
 
     @ModelAttribute
     public void prepareContext(final Model model) {
-        model.addAttribute("domainValues", domainRepository.findAll(Sort.by("id"))
-                .stream()
-                .collect(CustomCollectors.toSortedMap(Domain::getId, Domain::getId)));
+        model.addAttribute(
+                "domainValues",
+                domainRepository.findAll(Sort.by("id")).stream()
+                        .collect(CustomCollectors.toSortedMap(Domain::getId, Domain::getId)));
     }
 
     @GetMapping
@@ -52,8 +51,10 @@ public class DomainEventController {
     }
 
     @PostMapping("/add")
-    public String add(@ModelAttribute("domainEvent") @Valid final DomainEventDTO domainEventDTO,
-            final BindingResult bindingResult, final RedirectAttributes redirectAttributes) {
+    public String add(
+            @ModelAttribute("domainEvent") @Valid final DomainEventDTO domainEventDTO,
+            final BindingResult bindingResult,
+            final RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "domainEvent/add";
         }
@@ -69,9 +70,11 @@ public class DomainEventController {
     }
 
     @PostMapping("/edit/{id}")
-    public String edit(@PathVariable(name = "id") final Long id,
+    public String edit(
+            @PathVariable(name = "id") final Long id,
             @ModelAttribute("domainEvent") @Valid final DomainEventDTO domainEventDTO,
-            final BindingResult bindingResult, final RedirectAttributes redirectAttributes) {
+            final BindingResult bindingResult,
+            final RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "domainEvent/edit";
         }
@@ -81,11 +84,9 @@ public class DomainEventController {
     }
 
     @PostMapping("/delete/{id}")
-    public String delete(@PathVariable(name = "id") final Long id,
-            final RedirectAttributes redirectAttributes) {
+    public String delete(@PathVariable(name = "id") final Long id, final RedirectAttributes redirectAttributes) {
         domainEventService.delete(id);
         redirectAttributes.addFlashAttribute(WebUtils.MSG_INFO, WebUtils.getMessage("domainEvent.delete.success"));
         return "redirect:/domainEvents";
     }
-
 }

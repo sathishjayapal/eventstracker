@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RestController
 @RequestMapping(value = "/api/domains", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
@@ -49,8 +48,8 @@ public class DomainResource {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Long> updateDomain(@PathVariable(name = "id") final Long id,
-            @RequestBody @Valid final DomainDTO domainDTO) {
+    public ResponseEntity<Long> updateDomain(
+            @PathVariable(name = "id") final Long id, @RequestBody @Valid final DomainDTO domainDTO) {
         domainService.update(id, domainDTO);
         return ResponseEntity.ok(id);
     }
@@ -65,5 +64,4 @@ public class DomainResource {
         domainService.delete(id);
         return ResponseEntity.noContent().build();
     }
-
 }

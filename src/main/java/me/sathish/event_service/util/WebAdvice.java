@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-
 /**
  * Provide attributes available in all templates.
  */
@@ -15,5 +14,4 @@ public class WebAdvice {
     public String getRequestUri(final HttpServletRequest request) {
         return request.getRequestURI();
     }
-
 }

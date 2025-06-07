@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
 @Controller
 @RequestMapping("/domains")
 @PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
@@ -39,8 +38,10 @@ public class DomainController {
     }
 
     @PostMapping("/add")
-    public String add(@ModelAttribute("domain") @Valid final DomainDTO domainDTO,
-            final BindingResult bindingResult, final RedirectAttributes redirectAttributes) {
+    public String add(
+            @ModelAttribute("domain") @Valid final DomainDTO domainDTO,
+            final BindingResult bindingResult,
+            final RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "domain/add";
         }
@@ -56,9 +57,11 @@ public class DomainController {
     }
 
     @PostMapping("/edit/{id}")
-    public String edit(@PathVariable(name = "id") final Long id,
+    public String edit(
+            @PathVariable(name = "id") final Long id,
             @ModelAttribute("domain") @Valid final DomainDTO domainDTO,
-            final BindingResult bindingResult, final RedirectAttributes redirectAttributes) {
+            final BindingResult bindingResult,
+            final RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "domain/edit";
         }
@@ -68,17 +71,18 @@ public class DomainController {
     }
 
     @PostMapping("/delete/{id}")
-    public String delete(@PathVariable(name = "id") final Long id,
-            final RedirectAttributes redirectAttributes) {
+    public String delete(@PathVariable(name = "id") final Long id, final RedirectAttributes redirectAttributes) {
         final ReferencedWarning referencedWarning = domainService.getReferencedWarning(id);
         if (referencedWarning != null) {
-            redirectAttributes.addFlashAttribute(WebUtils.MSG_ERROR,
-                    WebUtils.getMessage(referencedWarning.getKey(), referencedWarning.getParams().toArray()));
+            redirectAttributes.addFlashAttribute(
+                    WebUtils.MSG_ERROR,
+                    WebUtils.getMessage(
+                            referencedWarning.getKey(),
+                            referencedWarning.getParams().toArray()));
         } else {
             domainService.delete(id);
             redirectAttributes.addFlashAttribute(WebUtils.MSG_INFO, WebUtils.getMessage("domain.delete.success"));
         }
         return "redirect:/domains";
     }
-
 }

@@ -18,7 +18,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Getter
@@ -31,12 +30,8 @@ public class DomainEvent {
             name = "primary_sequence",
             sequenceName = "primary_sequence",
             allocationSize = 1,
-            initialValue = 10000
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "primary_sequence"
-    )
+            initialValue = 10000)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "primary_sequence")
     private Long id;
 
     @Column(nullable = false, columnDefinition = "text")
@@ -65,5 +60,4 @@ public class DomainEvent {
     @LastModifiedDate
     @Column(nullable = false)
     private OffsetDateTime lastUpdated;
-
 }

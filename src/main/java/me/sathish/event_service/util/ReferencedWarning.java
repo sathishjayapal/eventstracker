@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 
-
 @Getter
 @Setter
 public class ReferencedWarning {
@@ -20,11 +19,8 @@ public class ReferencedWarning {
     public String toMessage() {
         String message = key;
         if (!params.isEmpty()) {
-            message += "," + params.stream()
-                    .map(Object::toString)
-                    .collect(Collectors.joining(","));
+            message += "," + params.stream().map(Object::toString).collect(Collectors.joining(","));
         }
         return message;
     }
-
 }
