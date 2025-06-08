@@ -32,6 +32,15 @@ CREATE TABLE event_domain_user (
     CONSTRAINT event_domain_user_pkey PRIMARY KEY (id)
 );
 
+CREATE TABLE shedlock
+(
+    name       VARCHAR(64)  NOT NULL,
+    lock_until TIMESTAMP    NOT NULL,
+    locked_at  TIMESTAMP    NOT NULL,
+    locked_by  VARCHAR(255) NOT NULL,
+    PRIMARY KEY (name)
+);
+
 ALTER TABLE domain_event ADD CONSTRAINT fk_domain_event_domain_id FOREIGN KEY (domain_id) REFERENCES domain (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 ALTER TABLE event_domain_user ADD CONSTRAINT unique_event_domain_user_username UNIQUE (username);
