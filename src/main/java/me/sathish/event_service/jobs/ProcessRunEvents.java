@@ -16,7 +16,7 @@ public class ProcessRunEvents {
     @Transactional
     @RabbitListener(queues = "garminrun-run-queue")
     //    @Scheduled(cron = "${processRunEvents.fixedRate}")
-    //    @SchedulerLock(name = "processNewOrders")
+
     public void processRunEvents(GarminRunDTO garminRunDTO) {
         //        LockAssert.assertLocked();
         if (garminRunDTO == null) {
