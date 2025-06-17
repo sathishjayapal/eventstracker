@@ -33,8 +33,8 @@ public abstract class BaseIT {
     @ServiceConnection
     private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:17.5");
 
-    public static final String AUTH_USER = "authUser";
-    public static final String PASSWORD = "Bootify!";
+    public static final String AUTH_USER = "sathish";
+    public static final String PASSWORD = "password";
     private static String eventserviceconfigSession = null;
 
     static {

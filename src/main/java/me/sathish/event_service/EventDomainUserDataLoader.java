@@ -25,17 +25,22 @@ public class EventDomainUserDataLoader implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        if (eventDomainUserRepository.findByUsernameIgnoreCase(environment.getProperty("eventDomainUser")) != null) {
+        String username = environment.getProperty("eventDomainUser");
+        String password = environment.getProperty("eventDomainUserPassword");
+        if (eventDomainUserRepository.findByUsernameIgnoreCase(username) != null) {
             System.out.println("Event Domain User already exists");
         } else {
+            if (username == null || password == null) {
+                throw new IllegalStateException("eventDomainUser and eventDomainUserPassword properties must not be null");
+            }
             EventDomainUser eventDomainUser = new EventDomainUser();
-            eventDomainUser.setUsername(environment.getProperty("eventDomainUser"));
-            eventDomainUser.setHash(passwordEncoder.encode(environment.getProperty("eventDomainUserPassword")));
+            eventDomainUser.setUsername(username);
+            eventDomainUser.setHash(passwordEncoder.encode(password));
             eventDomainUserRepository.saveAndFlush(eventDomainUser);
 
             EventDomainUser eventDomainUser2 = new EventDomainUser();
-            eventDomainUser2.setUsername(environment.getProperty("eventDomainUser") + "admin");
-            eventDomainUser2.setHash(passwordEncoder.encode(environment.getProperty("eventDomainUserPassword")));
+            eventDomainUser2.setUsername(username + "admin");
+            eventDomainUser2.setHash(passwordEncoder.encode(password));
             eventDomainUserRepository.saveAndFlush(eventDomainUser2);
         }
     }

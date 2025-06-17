@@ -35,6 +35,7 @@ public class EventserviceconfigSecurityConfig {
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/actuator/**"))
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
                 .formLogin(form -> form.loginPage("/login").failureUrl("/login?loginError=true"))
+                .httpBasic(basic -> basic.realmName("basic realm"))
                 .logout(logout ->
                         logout.logoutSuccessUrl("/?logoutSuccess=true").deleteCookies("JSESSIONID"))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(

@@ -7,14 +7,25 @@ import io.restassured.http.ContentType;
 import me.sathish.event_service.config.BaseIT;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 
+@SpringBootTest(properties = {
+    "eventDomainUser=sathish",
+    "eventDomainUserPassword=password"
+})
 public class DomainEventResourceTest extends BaseIT {
+
+    @Autowired
+    private Environment environment;
 
     @Test
     @Sql("/data/domainEventData.sql")
     void getAllDomainEvents_success() {
+        System.out.println("Domain user is" +environment.getProperty("eventDomainUser"));
         RestAssured.given()
                 .sessionId(eventserviceconfigSession())
                 .accept(ContentType.JSON)
