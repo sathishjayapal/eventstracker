@@ -1,4 +1,5 @@
 HELP.md
+
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -8,6 +9,7 @@ application-local.yml
 .DS_Store
 
 ## IntelliJ IDEA
+.env
 .idea
 *.iws
 *.iml
