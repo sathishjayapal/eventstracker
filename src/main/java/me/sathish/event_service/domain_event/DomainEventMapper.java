@@ -35,6 +35,7 @@ public interface DomainEventMapper {
             DomainEventDTO domainEventDTO,
             @MappingTarget DomainEvent domainEvent,
             @Context DomainRepository domainRepository) {
+        System.out.println("DomainEventMapper.afterUpdateDomainEvent called with domainEventDTO: " + domainEventDTO);
         final Domain domain = domainEventDTO.getDomain() == null
                 ? null
                 : domainRepository
