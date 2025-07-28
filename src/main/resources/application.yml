@@ -47,3 +47,7 @@ garminrun-event:
   garmin-exchange: garminrun-event-exchange
   garmin-newrun-queue: garminrun-run-queue
   garmin-error-queue: garminrun-error-queue
+
+# Event Domain User Configuration
+eventDomainUser: ${EVENT_DOMAIN_USER:user}
+eventDomainUserPassword: ${EVENT_DOMAIN_USER_PASSWORD:pass}

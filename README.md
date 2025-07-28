@@ -1,6 +1,8 @@
 # EventService
 
-This app was created with Bootify.io - tips on working with the code [can be found here](https://bootify.io/next-steps/).
+* lsof -ti:9081 - Returns the PID of the process listening on port 9081
+* kill -9 $(lsof -ti:9081) - Kills the process listening on port 9081
+
 
 ## Development
 
@@ -41,12 +43,3 @@ environment variable when running the container.
 ```
 mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=me.sathish/event-service
 ```
-
-## Further readings
-
-* [Maven docs](https://maven.apache.org/guides/index.html)  
-* [Spring Boot reference](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/)  
-* [Spring Data JPA reference](https://docs.spring.io/spring-data/jpa/reference/jpa.html)
-* [Thymeleaf docs](https://www.thymeleaf.org/documentation.html)  
-* [Bootstrap docs](https://getbootstrap.com/docs/5.3/getting-started/introduction/)  
-* [Learn Spring Boot with Thymeleaf](https://www.wimdeblauwe.com/books/taming-thymeleaf/)  
