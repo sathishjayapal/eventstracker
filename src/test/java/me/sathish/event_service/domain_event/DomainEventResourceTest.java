@@ -13,10 +13,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 
-@SpringBootTest(properties = {
-    "eventDomainUser=sathish",
-    "eventDomainUserPassword=password"
-})
+@SpringBootTest(properties = {"eventDomainUser=sathish", "eventDomainUserPassword=password"})
 public class DomainEventResourceTest extends BaseIT {
 
     @Autowired
@@ -25,7 +22,7 @@ public class DomainEventResourceTest extends BaseIT {
     @Test
     @Sql("/data/domainEventData.sql")
     void getAllDomainEvents_success() {
-        System.out.println("Domain user is" +environment.getProperty("eventDomainUser"));
+        System.out.println("Domain user is" + environment.getProperty("eventDomainUser"));
         RestAssured.given()
                 .sessionId(eventserviceconfigSession())
                 .accept(ContentType.JSON)
