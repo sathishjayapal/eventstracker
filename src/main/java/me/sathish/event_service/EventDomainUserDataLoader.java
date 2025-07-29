@@ -31,7 +31,8 @@ public class EventDomainUserDataLoader implements ApplicationRunner {
             System.out.println("Event Domain User already exists");
         } else {
             if (username == null || password == null) {
-                throw new IllegalStateException("eventDomainUser and eventDomainUserPassword properties must not be null");
+                throw new IllegalStateException(
+                        "eventDomainUser and eventDomainUserPassword properties must not be null");
             }
             EventDomainUser eventDomainUser = new EventDomainUser();
             eventDomainUser.setUsername(username);
