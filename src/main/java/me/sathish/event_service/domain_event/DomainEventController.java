@@ -58,7 +58,11 @@ public class DomainEventController {
         if (bindingResult.hasErrors()) {
             return "domainEvent/add";
         }
-        domainEventService.create(domainEventDTO);
+        try {
+            domainEventService.create(domainEventDTO);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute(WebUtils.MSG_ERROR, WebUtils.getMessage("domainEvent.create.failure"));
+        }
         redirectAttributes.addFlashAttribute(WebUtils.MSG_SUCCESS, WebUtils.getMessage("domainEvent.create.success"));
         return "redirect:/domainEvents";
     }

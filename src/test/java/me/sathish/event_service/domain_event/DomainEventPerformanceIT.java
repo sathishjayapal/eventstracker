@@ -43,7 +43,11 @@ class DomainEventPerformanceIT extends BaseIT {
         Instant start = Instant.now();
 
         for (DomainEventDTO event : events) {
-            domainEventService.create(event);
+            try {
+                domainEventService.create(event);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         Instant end = Instant.now();
@@ -67,7 +71,7 @@ class DomainEventPerformanceIT extends BaseIT {
 
     @Test
     @Timeout(15)
-    void findAll_WithLargeDataset_ShouldPerformWell() {
+    void findAll_WithLargeDataset_ShouldPerformWell() throws Exception {
         // Given - Create a substantial dataset
         int numberOfEvents = 50;
         List<DomainEventDTO> events = TestDataBuilder.createMultipleDomainEventDTOs(numberOfEvents, testDomain.getId());
@@ -109,7 +113,11 @@ class DomainEventPerformanceIT extends BaseIT {
                                         .withEventData("Concurrent test data from thread " + threadId + ", event " + i)
                                         .withDomain(testDomain.getId())
                                         .build();
-                                domainEventService.create(event);
+                                try {
+                                    domainEventService.create(event);
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
                         },
                         executor))
@@ -135,7 +143,7 @@ class DomainEventPerformanceIT extends BaseIT {
 
     @Test
     @Timeout(10)
-    void mixedOperations_ShouldMaintainPerformance() {
+    void mixedOperations_ShouldMaintainPerformance() throws Exception {
         // Given
         int numberOfOperations = 30;
 
@@ -182,7 +190,7 @@ class DomainEventPerformanceIT extends BaseIT {
 
     @Test
     @Timeout(10)
-    void memoryUsage_ShouldNotExceedReasonableLimits() throws InterruptedException {
+    void memoryUsage_ShouldNotExceedReasonableLimits() throws Exception {
         // Given
         Runtime runtime = Runtime.getRuntime();
         long initialMemory = runtime.totalMemory() - runtime.freeMemory();
@@ -217,7 +225,7 @@ class DomainEventPerformanceIT extends BaseIT {
 
     @Test
     @Timeout(5)
-    void databaseConnection_ShouldHandleRepeatedAccess() {
+    void databaseConnection_ShouldHandleRepeatedAccess() throws Exception {
         // Given
         int numberOfAccesses = 50;
 

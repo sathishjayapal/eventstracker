@@ -44,14 +44,12 @@ public class DomainEventService {
                 .orElseThrow(NotFoundException::new);
     }
 
-    public Long create(final DomainEventDTO domainEventDTO) {
+    public Long create(final DomainEventDTO domainEventDTO) throws Exception {
         final DomainEvent domainEvent = new DomainEvent();
         domainEventMapper.updateDomainEvent(domainEventDTO, domainEvent, domainRepository);
         final DomainEvent savedEvent = domainEventRepository.save(domainEvent);
-
         // Publish message to RabbitMQ after successful save
         publishDomainEventMessage(domainEventDTO);
-
         return savedEvent.getId();
     }
 
@@ -65,13 +63,13 @@ public class DomainEventService {
         domainEventRepository.deleteById(id);
     }
 
-    private void publishDomainEventMessage(final DomainEventDTO domainEventDTO) {
+    private void publishDomainEventMessage(final DomainEventDTO domainEventDTO) throws Exception {
         try {
             rabbitTemplate.convertAndSend(
                     applicationProperties.garminExchange(), applicationProperties.garminNewRunQueue(), domainEventDTO);
         } catch (Exception e) {
             System.err.println("Failed to publish domain event message: " + e.getMessage());
-            throw new RuntimeException("Failed to publish domain event message", e);
+            throw new Exception("Failed to publish domain event message", e);
         }
     }
 }

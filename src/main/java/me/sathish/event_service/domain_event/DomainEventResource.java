@@ -2,7 +2,9 @@ package me.sathish.event_service.domain_event;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+
 import java.util.List;
+
 import me.sathish.event_service.security.UserRoles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,7 +43,12 @@ public class DomainEventResource {
     @PostMapping
     @ApiResponse(responseCode = "201")
     public ResponseEntity<Long> createDomainEvent(@RequestBody @Valid final DomainEventDTO domainEventDTO) {
-        final Long createdId = domainEventService.create(domainEventDTO);
+        final Long createdId;
+        try {
+            createdId = domainEventService.create(domainEventDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
         return new ResponseEntity<>(createdId, HttpStatus.CREATED);
     }
 

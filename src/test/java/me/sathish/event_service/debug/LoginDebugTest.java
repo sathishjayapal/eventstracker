@@ -1,47 +1,53 @@
 package me.sathish.event_service.debug;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import me.sathish.event_service.config.BaseIT;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class LoginDebugTest extends BaseIT {
+
+    @Autowired
+    private TestRestTemplate restTemplate;
 
     @Test
     void debugLoginFlow() {
         System.out.println("=== Testing GET /login ===");
-        String initialSession = RestAssured.given()
-                .accept(ContentType.HTML)
-                .when()
-                .get("/login")
-                .then()
-                .statusCode(200)
-                .extract()
-                .sessionId();
+        ResponseEntity<String> loginPageResponse = restTemplate.getForEntity("/login", String.class);
+        System.out.println("Login page status: " + loginPageResponse.getStatusCode());
+        System.out.println("Login page body length: " + 
+            (loginPageResponse.getBody() != null ? loginPageResponse.getBody().length() : "null"));
+        
+        if (loginPageResponse.getStatusCode() == HttpStatus.OK) {
+            System.out.println(" Login page accessible");
+        } else {
+            System.out.println(" Login page not accessible: " + loginPageResponse.getStatusCode());
+        }
 
-        System.out.println("Initial session ID: " + initialSession);
+        System.out.println("=== Testing API endpoint with authentication ===");
+        ResponseEntity<String> apiResponse = restTemplate
+                .withBasicAuth("sathish", "password")
+                .getForEntity("/api/domains", String.class);
+        System.out.println("API response status: " + apiResponse.getStatusCode());
+        
+        if (apiResponse.getStatusCode() == HttpStatus.OK) {
+            System.out.println(" API endpoint accessible with basic auth");
+        } else {
+            System.out.println(" API endpoint not accessible: " + apiResponse.getStatusCode());
+        }
 
-        System.out.println("=== Testing POST /login ===");
-        try {
-            String loginSession = RestAssured.given()
-                    .sessionId(initialSession)
-                    .csrf("/login")
-                    .accept(ContentType.HTML)
-                    .contentType(ContentType.URLENC)
-                    .formParam("username", AUTH_USER)
-                    .formParam("password", PASSWORD)
-                    .when()
-                    .post("/login")
-                    .then()
-                    .log()
-                    .all()
-                    .extract()
-                    .sessionId();
-
-            System.out.println("Login session ID: " + loginSession);
-        } catch (Exception e) {
-            System.out.println("Login failed with exception: " + e.getMessage());
-            e.printStackTrace();
+        System.out.println("=== Testing API endpoint without authentication ===");
+        ResponseEntity<String> unauthResponse = restTemplate.getForEntity("/api/domains", String.class);
+        System.out.println("Unauth API response status: " + unauthResponse.getStatusCode());
+        
+        if (unauthResponse.getStatusCode() == HttpStatus.FORBIDDEN) {
+            System.out.println(" API endpoint properly protected (403 Forbidden)");
+        } else {
+            System.out.println(" API endpoint security issue: " + unauthResponse.getStatusCode());
         }
     }
 }

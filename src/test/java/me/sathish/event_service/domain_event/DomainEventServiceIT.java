@@ -52,7 +52,7 @@ class DomainEventServiceIT extends BaseIT {
     }
 
     @Test
-    void findAll_WhenEventsExist_ShouldReturnAllEvents() {
+    void findAll_WhenEventsExist_ShouldReturnAllEvents() throws Exception {
         // Given
         Long eventId1 = domainEventService.create(testDomainEventDTO);
 
@@ -78,7 +78,7 @@ class DomainEventServiceIT extends BaseIT {
     }
 
     @Test
-    void createAndGet_ShouldPersistAndRetrieveEvent() {
+    void createAndGet_ShouldPersistAndRetrieveEvent() throws Exception {
         // When - Create
         Long eventId = domainEventService.create(testDomainEventDTO);
 
@@ -109,7 +109,12 @@ class DomainEventServiceIT extends BaseIT {
     @Test
     void update_ShouldModifyExistingEvent() {
         // Given
-        Long eventId = domainEventService.create(testDomainEventDTO);
+        Long eventId = null;
+        try {
+            eventId = domainEventService.create(testDomainEventDTO);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         DomainEventDTO updateDTO = new DomainEventDTO();
         updateDTO.setEventType("UPDATED_EVENT_TYPE");
@@ -147,16 +152,23 @@ class DomainEventServiceIT extends BaseIT {
     @Test
     void delete_ShouldRemoveEvent() {
         // Given
-        Long eventId = domainEventService.create(testDomainEventDTO);
+        Long eventId = null;
+        try {
+            eventId = domainEventService.create(testDomainEventDTO);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         // Verify event exists
-        assertDoesNotThrow(() -> domainEventService.get(eventId));
+        Long finalEventId = eventId;
+        assertDoesNotThrow(() -> domainEventService.get(finalEventId));
 
         // When
         domainEventService.delete(eventId);
 
         // Then
-        assertThrows(NotFoundException.class, () -> domainEventService.get(eventId));
+        Long finalEventId1 = eventId;
+        assertThrows(NotFoundException.class, () -> domainEventService.get(finalEventId1));
     }
 
     @Test
@@ -173,7 +185,11 @@ class DomainEventServiceIT extends BaseIT {
             eventDTO.setEventId(UUID.randomUUID().toString());
             eventDTO.setUpdatedBy("test-user");
             eventDTO.setDomain(testDomain.getId());
-            domainEventService.create(eventDTO);
+            try {
+                domainEventService.create(eventDTO);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         // Then
@@ -188,7 +204,7 @@ class DomainEventServiceIT extends BaseIT {
     }
 
     @Test
-    void eventLifecycle_CreateUpdateDelete_ShouldWorkCorrectly() {
+    void eventLifecycle_CreateUpdateDelete_ShouldWorkCorrectly() throws Exception {
         // Create
         Long eventId = domainEventService.create(testDomainEventDTO);
         assertNotNull(eventId);

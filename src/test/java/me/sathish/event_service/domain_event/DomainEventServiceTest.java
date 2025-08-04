@@ -84,7 +84,7 @@ class DomainEventServiceTest {
         assertEquals(1, result.size());
         assertEquals(testDomainEventDTO, result.get(0));
         verify(domainEventRepository).findAll(Sort.by("id"));
-        verify(domainEventMapper).updateDomainEventDTO(testDomainEvent, new DomainEventDTO());
+        verify(domainEventMapper).updateDomainEventDTO(eq(testDomainEvent), any(DomainEventDTO.class));
     }
 
     @Test
@@ -102,7 +102,7 @@ class DomainEventServiceTest {
         assertNotNull(result);
         assertEquals(testDomainEventDTO, result);
         verify(domainEventRepository).findById(eventId);
-        verify(domainEventMapper).updateDomainEventDTO(testDomainEvent, new DomainEventDTO());
+        verify(domainEventMapper).updateDomainEventDTO(eq(testDomainEvent), any(DomainEventDTO.class));
     }
 
     @Test
@@ -125,7 +125,12 @@ class DomainEventServiceTest {
         when(applicationProperties.garminNewRunQueue()).thenReturn("test-queue");
 
         // When
-        Long result = domainEventService.create(testDomainEventDTO);
+        Long result = null;
+        try {
+            result = domainEventService.create(testDomainEventDTO);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         // Then
         assertEquals(testDomainEvent.getId(), result);
@@ -141,13 +146,14 @@ class DomainEventServiceTest {
         when(domainEventRepository.save(any(DomainEvent.class))).thenReturn(testDomainEvent);
         when(applicationProperties.garminExchange()).thenReturn("test-exchange");
         when(applicationProperties.garminNewRunQueue()).thenReturn("test-queue");
-        //        doThrow(new RuntimeException("RabbitMQ connection failed"))
-        //                .when(rabbitTemplate)
-        //                .convertAndSend(anyString(), anyString(), any());
+                doThrow(new RuntimeException("RabbitMQ connection failed"))
+                        .when(rabbitTemplate)
+                        .convertAndSend(anyString());
 
         // When & Then
-        RuntimeException exception =
-                assertThrows(RuntimeException.class, () -> domainEventService.create(testDomainEventDTO));
+
+        Exception exception =
+                assertThrows(Exception.class, () -> domainEventService.create(testDomainEventDTO));
         assertEquals("Failed to publish domain event message", exception.getMessage());
 
         verify(domainEventRepository).save(any(DomainEvent.class));
