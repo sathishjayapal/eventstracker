@@ -1,2 +1,30 @@
 eventDomainUser: user
 eventDomainUserPassword: pass
+
+server:
+  port: 0  # Use random port for tests
+
+# Provide default values for common placeholders that might be missing
+local:
+  server:
+    port: ${server.port:0}
+
+# Test-specific configurations
+spring:
+  test:
+    database:
+      replace: none
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+
+garminrun-event:
+  garmin-exchange: garminrun-testevent-exchange
+  garmin-newrun-queue: garminrun-testrun-queue
+  garmin-error-queue: garminrun-testerror-queue
