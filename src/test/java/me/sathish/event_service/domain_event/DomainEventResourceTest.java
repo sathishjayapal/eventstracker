@@ -24,7 +24,7 @@ public class DomainEventResourceTest extends BaseIT {
     void getAllDomainEvents_success() {
         System.out.println("Domain user is" + environment.getProperty("eventDomainUser"));
         RestAssured.given()
-                .sessionId(eventserviceconfigSession())
+                .port(getActualPort())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/domainEvents")
@@ -38,7 +38,7 @@ public class DomainEventResourceTest extends BaseIT {
     @Sql("/data/domainEventData.sql")
     void getDomainEvent_success() {
         RestAssured.given()
-                .sessionId(eventserviceconfigSession())
+                .port(getActualPort())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/domainEvents/1100")
@@ -53,7 +53,7 @@ public class DomainEventResourceTest extends BaseIT {
     @Test
     void getDomainEvent_notFound() {
         RestAssured.given()
-                .sessionId(eventserviceconfigSession())
+                .port(getActualPort())
                 .accept(ContentType.JSON)
                 .when()
                 .get("/api/domainEvents/1766")
@@ -65,7 +65,7 @@ public class DomainEventResourceTest extends BaseIT {
     @Test
     void createDomainEvent_success() {
         RestAssured.given()
-                .sessionId(eventserviceconfigSession())
+                .port(getActualPort())
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
                 .body(readResource("/requests/domainEventDTORequest.json"))
@@ -79,7 +79,7 @@ public class DomainEventResourceTest extends BaseIT {
     @Test
     void createDomainEvent_missingField() {
         RestAssured.given()
-                .sessionId(eventserviceconfigSession())
+                .port(getActualPort())
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
                 .body(readResource("/requests/domainEventDTORequest_missingField.json"))
@@ -96,7 +96,7 @@ public class DomainEventResourceTest extends BaseIT {
     @Sql("/data/domainEventData.sql")
     void updateDomainEvent_success() {
         RestAssured.given()
-                .sessionId(eventserviceconfigSession())
+                .port(getActualPort())
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
                 .body(readResource("/requests/domainEventDTORequest.json"))
@@ -114,7 +114,7 @@ public class DomainEventResourceTest extends BaseIT {
     @Sql("/data/domainEventData.sql")
     void deleteDomainEvent_success() {
         RestAssured.given()
-                .sessionId(eventserviceconfigSession())
+                .port(getActualPort())
                 .accept(ContentType.JSON)
                 .when()
                 .delete("/api/domainEvents/1100")
