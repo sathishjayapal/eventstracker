@@ -1,13 +1,7 @@
 package me.sathish.event_service.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.*;
+
 import java.time.OffsetDateTime;
 import java.util.Set;
 import lombok.Getter;
@@ -42,7 +36,8 @@ public class Domain {
     @Column(columnDefinition = "text")
     private String comments;
 
-    @OneToMany(mappedBy = "domain")
+    @OneToMany(mappedBy = "domain", cascade = CascadeType.ALL, orphanRemoval = true)
+
     private Set<DomainEvent> domainEvents;
 
     @CreatedDate
