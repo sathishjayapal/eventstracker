@@ -1,5 +1,8 @@
 package me.sathish.event_service.domain;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -25,14 +28,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class DomainResource {
 
     private final DomainService domainService;
+    private final ObjectMapper objectMapper;
 
-    public DomainResource(final DomainService domainService) {
+    public DomainResource(final DomainService domainService, final ObjectMapper objectMapper   ) {
+        this.objectMapper = objectMapper;
         this.domainService = domainService;
     }
 
     @GetMapping
-    public ResponseEntity<List<DomainDTO>> getAllDomains() {
-        return ResponseEntity.ok(domainService.findAll());
+    public ResponseEntity<String> getAllDomains() {
+        try {
+            String jsonPayload = objectMapper.writeValueAsString(domainService.findAll());
+            return ResponseEntity.ok(jsonPayload);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.ok("JSON Parsing Failed");
+        }
     }
 
     @GetMapping("/{id}")
