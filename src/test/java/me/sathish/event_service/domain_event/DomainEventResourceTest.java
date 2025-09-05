@@ -2,10 +2,7 @@ package me.sathish.event_service.domain_event;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import me.sathish.event_service.config.BaseIT;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +21,7 @@ public class DomainEventResourceTest extends BaseIT {
 
     @Autowired
     private Environment environment;
+
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -31,12 +29,12 @@ public class DomainEventResourceTest extends BaseIT {
     @Sql("/data/domainEventData.sql")
     void getAllDomainEvents_success() {
         System.out.println("Domain user is" + environment.getProperty("eventDomainUser"));
-        
+
         // GET request to retrieve all domain events
         ResponseEntity<Object[]> response = restTemplate
                 .withBasicAuth("sathish", "password")
                 .getForEntity("http://localhost:" + getActualPort() + "/api/domainEvents", Object[].class);
-        
+
         if (response.getStatusCode() == HttpStatus.OK) {
             System.out.println("Domain events retrieved successfully");
         } else {
@@ -51,7 +49,7 @@ public class DomainEventResourceTest extends BaseIT {
         ResponseEntity<Object> response = restTemplate
                 .withBasicAuth("sathish", "password")
                 .getForEntity("http://localhost:" + getActualPort() + "/api/domainEvents/1100", Object.class);
-        
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         System.out.println("Domain event retrieved successfully");
     }
@@ -62,7 +60,7 @@ public class DomainEventResourceTest extends BaseIT {
         ResponseEntity<Object> response = restTemplate
                 .withBasicAuth("sathish", "password")
                 .getForEntity("http://localhost:" + getActualPort() + "/api/domainEvents/1766", Object.class);
-        
+
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         System.out.println("Domain event not found");
     }
@@ -73,14 +71,14 @@ public class DomainEventResourceTest extends BaseIT {
         // POST request to create a new domain event
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        
+
         String requestBody = readResource("/requests/domainEventDTORequest.json");
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
-        
+
         ResponseEntity<Object> response = restTemplate
                 .withBasicAuth("sathish", "password")
                 .postForEntity("http://localhost:" + getActualPort() + "/api/domainEvents", request, Object.class);
-        
+
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         System.out.println("Domain event created successfully");
     }
@@ -90,14 +88,14 @@ public class DomainEventResourceTest extends BaseIT {
         // POST request to create a new domain event with missing field
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        
+
         String requestBody = readResource("/requests/domainEventDTORequest_missingField.json");
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
-        
+
         ResponseEntity<Object> response = restTemplate
                 .withBasicAuth("sathish", "password")
                 .postForEntity("http://localhost:" + getActualPort() + "/api/domainEvents", request, Object.class);
-        
+
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         System.out.println("Domain event creation failed due to missing field");
     }
@@ -108,14 +106,18 @@ public class DomainEventResourceTest extends BaseIT {
         // PUT request to update an existing domain event
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        
+
         String requestBody = readResource("/requests/domainEventDTORequest.json");
         HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
-        
+
         ResponseEntity<Object> response = restTemplate
                 .withBasicAuth("sathish", "password")
-                .exchange("http://localhost:" + getActualPort() + "/api/domainEvents/1100", HttpMethod.PUT, request, Object.class);
-        
+                .exchange(
+                        "http://localhost:" + getActualPort() + "/api/domainEvents/1100",
+                        HttpMethod.PUT,
+                        request,
+                        Object.class);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         System.out.println("Domain event updated successfully");
     }
@@ -126,8 +128,12 @@ public class DomainEventResourceTest extends BaseIT {
         // DELETE request to delete an existing domain event
         ResponseEntity<Object> response = restTemplate
                 .withBasicAuth("sathish", "password")
-                .exchange("http://localhost:" + getActualPort() + "/api/domainEvents/1100", HttpMethod.DELETE, HttpEntity.EMPTY, Object.class);
-        
+                .exchange(
+                        "http://localhost:" + getActualPort() + "/api/domainEvents/1100",
+                        HttpMethod.DELETE,
+                        HttpEntity.EMPTY,
+                        Object.class);
+
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         System.out.println("Domain event deleted successfully");
     }

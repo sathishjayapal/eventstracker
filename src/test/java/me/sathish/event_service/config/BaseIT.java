@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import lombok.SneakyThrows;
-import me.sathish.event_service.EventServiceApplication;
 import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.domain_event.DomainEventRepository;
 import me.sathish.event_service.event_domain_user.EventDomainUserRepository;

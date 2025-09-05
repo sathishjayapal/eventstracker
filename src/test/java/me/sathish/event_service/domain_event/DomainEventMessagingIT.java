@@ -51,7 +51,7 @@ class DomainEventMessagingIT extends BaseIT {
         testDomainEventDTO.setCreatedBy("test-user");
         testDomainEventDTO.setUpdatedBy("test-user");
         testDomainEventDTO.setDomain(testDomain.getId());
-        
+
         // Configure mock RabbitTemplate to not throw exceptions by default
         doNothing().when(rabbitTemplate).convertAndSend(anyString(), anyString(), any(Object.class));
     }
@@ -76,7 +76,8 @@ class DomainEventMessagingIT extends BaseIT {
     void create_WithRabbitMQFailure_ShouldStillPersistButThrowException() {
         // Given - Configure mock to throw exception
         doThrow(new RuntimeException("RabbitMQ connection failed"))
-                .when(rabbitTemplate).convertAndSend(anyString(), anyString(), any(Object.class));
+                .when(rabbitTemplate)
+                .convertAndSend(anyString(), anyString(), any(Object.class));
 
         // When & Then
         Exception exception = assertThrows(Exception.class, () -> {
@@ -94,10 +95,7 @@ class DomainEventMessagingIT extends BaseIT {
     void create_MultipleEvents_ShouldPublishAllMessages() throws Exception {
         // Given
         List<DomainEventDTO> events = Arrays.asList(
-                createTestEventDTO("EVENT_1"),
-                createTestEventDTO("EVENT_2"),
-                createTestEventDTO("EVENT_3")
-        );
+                createTestEventDTO("EVENT_1"), createTestEventDTO("EVENT_2"), createTestEventDTO("EVENT_3"));
 
         // When
         for (DomainEventDTO event : events) {
@@ -105,8 +103,7 @@ class DomainEventMessagingIT extends BaseIT {
         }
 
         // Then
-        verify(rabbitTemplate, times(3))
-                .convertAndSend(anyString(), anyString(), any(Object.class));
+        verify(rabbitTemplate, times(3)).convertAndSend(anyString(), anyString(), any(Object.class));
     }
 
     @Test
@@ -121,9 +118,9 @@ class DomainEventMessagingIT extends BaseIT {
                         eq(applicationProperties.garminNewRunQueue()),
                         argThat((Object dto) -> {
                             DomainEventDTO publishedDto = (DomainEventDTO) dto;
-                            return "MESSAGING_TEST_EVENT".equals(publishedDto.getEventType()) &&
-                                   "Messaging test event payload".equals(publishedDto.getPayload()) &&
-                                   "test-user".equals(publishedDto.getCreatedBy());
+                            return "MESSAGING_TEST_EVENT".equals(publishedDto.getEventType())
+                                    && "Messaging test event payload".equals(publishedDto.getPayload())
+                                    && "test-user".equals(publishedDto.getCreatedBy());
                         }));
     }
 
@@ -131,7 +128,7 @@ class DomainEventMessagingIT extends BaseIT {
     void update_ShouldNotPublishMessage() throws Exception {
         // Given - First create an event
         Long eventId = domainEventService.create(testDomainEventDTO);
-        
+
         // Reset mock to clear the create call
         reset(rabbitTemplate);
         doNothing().when(rabbitTemplate).convertAndSend(anyString(), anyString(), any(Object.class));
@@ -148,7 +145,7 @@ class DomainEventMessagingIT extends BaseIT {
     void delete_ShouldNotPublishMessage() throws Exception {
         // Given - First create an event
         Long eventId = domainEventService.create(testDomainEventDTO);
-        
+
         // Reset mock to clear the create call
         reset(rabbitTemplate);
 
@@ -163,9 +160,7 @@ class DomainEventMessagingIT extends BaseIT {
     void create_WithDifferentEventTypes_ShouldPublishAllCorrectly() throws Exception {
         // Given
         List<String> eventTypes = Arrays.asList(
-                "USER_CREATED", "USER_UPDATED", "USER_DELETED",
-                "ORDER_PLACED", "ORDER_SHIPPED", "ORDER_DELIVERED"
-        );
+                "USER_CREATED", "USER_UPDATED", "USER_DELETED", "ORDER_PLACED", "ORDER_SHIPPED", "ORDER_DELIVERED");
 
         // When
         for (String eventType : eventTypes) {
