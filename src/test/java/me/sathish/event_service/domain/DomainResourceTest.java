@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import me.sathish.event_service.config.BaseIT;
-import me.sathish.event_service.domain.DomainRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.jdbc.Sql;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {"eventDomainUser=sathish", "eventDomainUserPassword=password"})
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {"eventDomainUser=sathish", "eventDomainUserPassword=password"})
 public class DomainResourceTest extends BaseIT {
 
     @Autowired
@@ -29,10 +30,9 @@ public class DomainResourceTest extends BaseIT {
     @Test
     @Sql("/data/domainData.sql")
     void getAllDomains_success() {
-        ResponseEntity<String> response = restTemplate
-                .withBasicAuth("sathish", "password")
-                .getForEntity("/api/domains", String.class);
-        
+        ResponseEntity<String> response =
+                restTemplate.withBasicAuth("sathish", "password").getForEntity("/api/domains", String.class);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         // Verify we get the expected domain data
@@ -50,10 +50,9 @@ public class DomainResourceTest extends BaseIT {
     @Test
     @Sql("/data/domainData.sql")
     void getDomain_success() {
-        ResponseEntity<String> response = restTemplate
-                .withBasicAuth("sathish", "password")
-                .getForEntity("/api/domains/1000", String.class);
-        
+        ResponseEntity<String> response =
+                restTemplate.withBasicAuth("sathish", "password").getForEntity("/api/domains/1000", String.class);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assert response.getBody().contains("1000");
@@ -61,10 +60,9 @@ public class DomainResourceTest extends BaseIT {
 
     @Test
     void getDomain_notFound() {
-        ResponseEntity<String> response = restTemplate
-                .withBasicAuth("sathish", "password")
-                .getForEntity("/api/domains/999", String.class);
-        
+        ResponseEntity<String> response =
+                restTemplate.withBasicAuth("sathish", "password").getForEntity("/api/domains/999", String.class);
+
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
@@ -73,11 +71,11 @@ public class DomainResourceTest extends BaseIT {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> requestEntity = new HttpEntity<>(readResource("/requests/domainDTORequest.json"), headers);
-        
+
         ResponseEntity<String> response = restTemplate
                 .withBasicAuth("sathish", "password")
                 .postForEntity("/api/domains", requestEntity, String.class);
-        
+
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(1, domainRepository.count());
     }
@@ -86,12 +84,13 @@ public class DomainResourceTest extends BaseIT {
     void createDomain_missingField() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> requestEntity = new HttpEntity<>(readResource("/requests/domainDTORequest_missingField.json"), headers);
-        
+        HttpEntity<String> requestEntity =
+                new HttpEntity<>(readResource("/requests/domainDTORequest_missingField.json"), headers);
+
         ResponseEntity<String> response = restTemplate
                 .withBasicAuth("sathish", "password")
                 .postForEntity("/api/domains", requestEntity, String.class);
-        
+
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
@@ -101,11 +100,11 @@ public class DomainResourceTest extends BaseIT {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> requestEntity = new HttpEntity<>(readResource("/requests/domainDTORequest.json"), headers);
-        
+
         ResponseEntity<String> response = restTemplate
                 .withBasicAuth("sathish", "password")
                 .exchange("/api/domains/1000", HttpMethod.PUT, requestEntity, String.class);
-        
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(
                 "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.",
@@ -118,7 +117,7 @@ public class DomainResourceTest extends BaseIT {
         ResponseEntity<String> response = restTemplate
                 .withBasicAuth("sathish", "password")
                 .exchange("/api/domains/1000", HttpMethod.DELETE, HttpEntity.EMPTY, String.class);
-        
+
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertEquals(1, domainRepository.count());
     }

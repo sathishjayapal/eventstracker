@@ -146,14 +146,13 @@ class DomainEventServiceTest {
         when(domainEventRepository.save(any(DomainEvent.class))).thenReturn(testDomainEvent);
         when(applicationProperties.garminExchange()).thenReturn("test-exchange");
         when(applicationProperties.garminNewRunQueue()).thenReturn("test-queue");
-                doThrow(new RuntimeException("RabbitMQ connection failed"))
-                        .when(rabbitTemplate)
-                        .convertAndSend(anyString());
+        doThrow(new RuntimeException("RabbitMQ connection failed"))
+                .when(rabbitTemplate)
+                .convertAndSend(anyString());
 
         // When & Then
 
-        Exception exception =
-                assertThrows(Exception.class, () -> domainEventService.create(testDomainEventDTO));
+        Exception exception = assertThrows(Exception.class, () -> domainEventService.create(testDomainEventDTO));
         assertEquals("Failed to publish domain event message", exception.getMessage());
 
         verify(domainEventRepository).save(any(DomainEvent.class));

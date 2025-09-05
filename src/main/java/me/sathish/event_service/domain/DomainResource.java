@@ -2,10 +2,8 @@ package me.sathish.event_service.domain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
-import java.util.List;
 import me.sathish.event_service.security.UserRoles;
 import me.sathish.event_service.util.ReferencedException;
 import me.sathish.event_service.util.ReferencedWarning;
@@ -30,7 +28,7 @@ public class DomainResource {
     private final DomainService domainService;
     private final ObjectMapper objectMapper;
 
-    public DomainResource(final DomainService domainService, final ObjectMapper objectMapper   ) {
+    public DomainResource(final DomainService domainService, final ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.domainService = domainService;
     }
