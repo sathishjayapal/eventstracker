@@ -1,7 +1,6 @@
 package me.sathish.event_service.domain;
 
 import jakarta.persistence.*;
-
 import java.time.OffsetDateTime;
 import java.util.Set;
 import lombok.Getter;
@@ -37,7 +36,6 @@ public class Domain {
     private String comments;
 
     @OneToMany(mappedBy = "domain", cascade = CascadeType.ALL, orphanRemoval = true)
-
     private Set<DomainEvent> domainEvents;
 
     @CreatedDate
