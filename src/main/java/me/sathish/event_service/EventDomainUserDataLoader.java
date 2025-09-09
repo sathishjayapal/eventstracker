@@ -1,5 +1,6 @@
 package me.sathish.event_service;
 
+import lombok.extern.slf4j.Slf4j;
 import me.sathish.event_service.event_domain_user.EventDomainUser;
 import me.sathish.event_service.event_domain_user.EventDomainUserRepository;
 import org.springframework.boot.ApplicationArguments;
@@ -9,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class EventDomainUserDataLoader implements ApplicationRunner {
     private final EventDomainUserRepository eventDomainUserRepository;
     private final PasswordEncoder passwordEncoder;
@@ -28,7 +30,7 @@ public class EventDomainUserDataLoader implements ApplicationRunner {
         String username = environment.getProperty("eventDomainUser");
         String password = environment.getProperty("eventDomainUserPassword");
         if (eventDomainUserRepository.findByUsernameIgnoreCase(username) != null) {
-            System.out.println("Event Domain User already exists");
+            log.error("Event Domain User already exists");
         } else {
             if (username == null || password == null) {
                 throw new IllegalStateException(

@@ -1,6 +1,8 @@
 package me.sathish.event_service.domain_event;
 
 import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
 import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.util.ApplicationProperties;
 import me.sathish.event_service.util.NotFoundException;
@@ -9,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class DomainEventService {
 
     private final DomainEventRepository domainEventRepository;
@@ -68,7 +71,7 @@ public class DomainEventService {
             rabbitTemplate.convertAndSend(
                     applicationProperties.garminExchange(), applicationProperties.garminNewRunQueue(), domainEventDTO);
         } catch (Exception e) {
-            System.err.println("Failed to publish domain event message: " + e.getMessage());
+            log.error("Failed to publish domain event message: " + e.getMessage());
             throw new Exception("Failed to publish domain event message", e);
         }
     }

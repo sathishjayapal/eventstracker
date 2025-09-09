@@ -1,5 +1,6 @@
 package me.sathish.event_service.domain_event;
 
+import lombok.extern.slf4j.Slf4j;
 import me.sathish.event_service.domain.Domain;
 import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.util.NotFoundException;
