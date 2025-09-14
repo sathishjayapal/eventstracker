@@ -1,7 +1,6 @@
 package me.sathish.event_service.domain_event;
 
 import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
 import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.util.ApplicationProperties;
