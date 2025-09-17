@@ -32,7 +32,7 @@ public class ProcessRabbitMQEvents {
                 domainEventDTO.getEventId());
 
         processedEvents.add(domainEventDTO);
-        logger.info("Total processed events count: {}", processedEvents.size());
+        logger.info("Total processed events count from queue: {}", processedEvents.size());
 
         // Add your event processing logic here based on event type
         switch (domainEventDTO.getEventType()) {
