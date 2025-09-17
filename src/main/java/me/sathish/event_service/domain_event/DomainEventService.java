@@ -68,10 +68,10 @@ public class DomainEventService {
     private void publishDomainEventMessage(final DomainEventDTO domainEventDTO) throws Exception {
         try {
             rabbitTemplate.convertAndSend(
-                    applicationProperties.garminExchange(), applicationProperties.garminNewRunQueue(), domainEventDTO);
+                    applicationProperties.garminExchange(), "github.operations.crud", domainEventDTO);
         } catch (Exception e) {
             log.error("Failed to publish domain event message: " + e.getMessage());
-            throw new Exception("Failed to publish domain event message", e);
+            throw new RuntimeException("Failed to publish domain event message", e);
         }
     }
 }
