@@ -44,10 +44,7 @@ server:
   processRunEvents:
     fixedRate: 10000
 garminrun-event:
-  garmin-exchange: garminrun-event-exchange
-  garmin-newrun-queue: garminrun-run-queue
-  garmin-error-queue: garminrun-error-queue
-
+  garmin-exchange: x.github
 # Event Domain User Configuration
 eventDomainUser: ${EVENT_DOMAIN_USER:user}
 eventDomainUserPassword: ${EVENT_DOMAIN_USER_PASSWORD:pass}
