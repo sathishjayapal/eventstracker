@@ -43,8 +43,9 @@ server:
   port: 9081
   processRunEvents:
     fixedRate: 10000
-garminrun-event:
-  garmin-exchange: x.github
+sathishprojects:
+  sathish_project_events_exchange: x.sathishprojects.events
+  github_routing_key: github.operations.crud
 # Event Domain User Configuration
 eventDomainUser: ${EVENT_DOMAIN_USER:user}
 eventDomainUserPassword: ${EVENT_DOMAIN_USER_PASSWORD:pass}
