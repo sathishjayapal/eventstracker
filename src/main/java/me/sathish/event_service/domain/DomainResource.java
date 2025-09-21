@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import me.sathish.event_service.security.UserRoles;
 import me.sathish.event_service.util.ReferencedException;
 import me.sathish.event_service.util.ReferencedWarning;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/api/domains", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
+@Slf4j
 public class DomainResource {
 
     private final DomainService domainService;
@@ -35,6 +37,7 @@ public class DomainResource {
 
     @GetMapping
     public ResponseEntity<String> getAllDomains() {
+        log.error("Getting all domains");
         try {
             String jsonPayload = objectMapper.writeValueAsString(domainService.findAll());
             return ResponseEntity.ok(jsonPayload);
@@ -51,6 +54,7 @@ public class DomainResource {
     @PostMapping
     @ApiResponse(responseCode = "201")
     public ResponseEntity<Long> createDomain(@RequestBody @Valid final DomainDTO domainDTO) {
+        log.info("Creating domain {}", domainDTO);
         final Long createdId = domainService.create(domainDTO);
         return new ResponseEntity<>(createdId, HttpStatus.CREATED);
     }
@@ -65,6 +69,7 @@ public class DomainResource {
     @DeleteMapping("/{id}")
     @ApiResponse(responseCode = "204")
     public ResponseEntity<Void> deleteDomain(@PathVariable(name = "id") final Long id) {
+        log.info("Deleting domain {}", id);
         final ReferencedWarning referencedWarning = domainService.getReferencedWarning(id);
         if (referencedWarning != null) {
             throw new ReferencedException(referencedWarning);

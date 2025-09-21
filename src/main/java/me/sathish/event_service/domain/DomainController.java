@@ -1,6 +1,7 @@
 package me.sathish.event_service.domain;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import me.sathish.event_service.security.UserRoles;
 import me.sathish.event_service.util.ReferencedWarning;
 import me.sathish.event_service.util.WebUtils;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/domains")
+@Slf4j
 @PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
 public class DomainController {
 
