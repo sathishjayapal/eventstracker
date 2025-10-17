@@ -22,7 +22,7 @@ public class ProcessRabbitMQEvents {
     }
 
     @Transactional
-    @RabbitListener(queues = "x.github.operations")
+//    @RabbitListener(queues = "x.github.operations")
     public void processRunEvents(DomainEventDTO domainEventDTO) {
 
         //        LockAssert.assertLocked();
