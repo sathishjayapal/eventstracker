@@ -67,10 +67,13 @@ public class DomainEventService {
 
     private void publishDomainEventMessage(final DomainEventDTO domainEventDTO) throws Exception {
         try {
-            log.error("Exchanging domain event message to RabbitMQ" + applicationProperties.sathishProjectEventsExchange());
+            log.error("Exchanging domain event message to RabbitMQ"
+                    + applicationProperties.sathishProjectEventsExchange());
             for (int i = 0; i < 10; i++) {
                 rabbitTemplate.convertAndSend(
-                        applicationProperties.sathishProjectEventsExchange(), applicationProperties.githubRoutingKey(), domainEventDTO);
+                        applicationProperties.sathishProjectEventsExchange(),
+                        applicationProperties.githubRoutingKey(),
+                        domainEventDTO);
             }
 
         } catch (Exception e) {
