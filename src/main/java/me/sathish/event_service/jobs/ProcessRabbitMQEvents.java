@@ -3,10 +3,6 @@ package me.sathish.event_service.jobs;
 import lombok.extern.slf4j.Slf4j;
 import me.sathish.event_service.domain_event.DomainEventDTO;
 import me.sathish.event_service.util.ApplicationProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +18,7 @@ public class ProcessRabbitMQEvents {
     }
 
     @Transactional
-//    @RabbitListener(queues = "x.github.operations")
+    //    @RabbitListener(queues = "x.github.operations")
     public void processRunEvents(DomainEventDTO domainEventDTO) {
 
         //        LockAssert.assertLocked();
