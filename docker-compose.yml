@@ -1,5 +1,7 @@
 services:
+
   postgres:
+    container_name: event-service-db
     image: postgres:17.5
     environment:
     - POSTGRES_DB=event-service
