@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.domain_event.DomainEventRepository;
 import me.sathish.event_service.event_domain_user.EventDomainUserRepository;
@@ -30,6 +31,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @TestPropertySource(properties = {"server.port=0"})
 @Sql({"/data/clearAll.sql", "/data/eventDomainUserData.sql"})
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
+@Slf4j
 public abstract class BaseIT {
 
     @ServiceConnection
@@ -65,6 +67,7 @@ public abstract class BaseIT {
 
     @BeforeEach
     public void setupPort() throws InterruptedException {
+
         // Give the server a moment to fully start
         Thread.sleep(100);
 
