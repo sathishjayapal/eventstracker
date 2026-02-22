@@ -6,11 +6,9 @@ import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.util.ApplicationProperties;
 import me.sathish.event_service.util.NotFoundException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
@@ -37,8 +35,9 @@ public class DomainEventService {
 
     public List<DomainEventDTO> findAll() {
         Pageable page = PageRequest.of(0, 10);
-        final List<DomainEvent> domainEvents =domainEventRepository.findAll(page).getContent();
-//        final List<DomainEvent> domainEvents = domainEventRepository.findAll(Sort.by("id"));
+        final List<DomainEvent> domainEvents =
+                domainEventRepository.findAll(page).getContent();
+        //        final List<DomainEvent> domainEvents = domainEventRepository.findAll(Sort.by("id"));
 
         return domainEvents.stream()
                 .map(domainEvent -> domainEventMapper.updateDomainEventDTO(domainEvent, new DomainEventDTO()))

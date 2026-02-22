@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${eventstracker_JDBC_DATABASE_URL}
-    username: ${eventstracker_JDBC_DATABASE_USERNAME}
-    password: ${eventstracker_JDBC_DATABASE_PASSWORD}
+    url: ${eventstracker_JDBC_DATABASE_URL:jdbc:postgresql://localhost:5445/eventstracker_db}
+    username: ${eventstracker_JDBC_DATABASE_USERNAME:postgres}
+    password: ${eventstracker_JDBC_DATABASE_PASSWORD:P4ssword!}
     hikari:
       connection-timeout: 50000
       maximum-pool-size: 10

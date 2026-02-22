@@ -15,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
@@ -24,26 +22,25 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.util.StreamUtils;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@TestPropertySource(properties = {"server.port=0"})
+@TestPropertySource(
+        properties = {
+            "server.port=0",
+            "spring.datasource.url=jdbc:postgresql://localhost:5445/eventstracker_db",
+            "spring.datasource.username=postgres",
+            "spring.datasource.password=P4ssword!",
+            "spring.datasource.driver-class-name=org.postgresql.Driver"
+        })
 @Sql({"/data/clearAll.sql", "/data/eventDomainUserData.sql"})
 @SqlMergeMode(SqlMergeMode.MergeMode.MERGE)
 @Slf4j
 public abstract class BaseIT {
 
-    @ServiceConnection
-    private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:17.5");
-
     public static final String AUTH_USER = "sathish";
     public static final String PASSWORD = "password";
     private static String eventserviceconfigSession = null;
-
-    static {
-        postgreSQLContainer.withReuse(true).start();
-    }
 
     @Autowired
     private Environment environment;
@@ -149,18 +146,7 @@ public abstract class BaseIT {
         System.out.println("=== DEBUG: init() called ===");
         System.out.println(
                 "ApplicationContext type: " + applicationContext.getClass().getName());
-        System.out.println("Is ServletWebServerApplicationContext? "
-                + (applicationContext instanceof ServletWebServerApplicationContext));
-
-        if (applicationContext instanceof ServletWebServerApplicationContext) {
-            ServletWebServerApplicationContext servletWebServerApplicationContext =
-                    (ServletWebServerApplicationContext) applicationContext;
-            actualPort = servletWebServerApplicationContext.getWebServer().getPort();
-            System.out.println("=== DEBUG: ServletWebServerApplicationContext used ===");
-            System.out.println("Port from ApplicationContext: " + actualPort);
-        } else {
-            System.out.println("ApplicationContext is not ServletWebServerApplicationContext, cannot get port");
-        }
+        // Port will be set in setupPort() method
     }
 
     protected int getActualPort() {
