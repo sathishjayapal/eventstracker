@@ -24,4 +24,6 @@ public class DomainEventDTO {
     private String updatedBy;
 
     private Long domain;
+
+    private String domainName;
 }

@@ -3,6 +3,7 @@ package me.sathish.event_service.domain_event;
 import jakarta.validation.Valid;
 import me.sathish.event_service.domain.Domain;
 import me.sathish.event_service.domain.DomainRepository;
+import me.sathish.event_service.domain.DomainInactiveException;
 import me.sathish.event_service.security.UserRoles;
 import me.sathish.event_service.util.CustomCollectors;
 import me.sathish.event_service.util.WebUtils;
@@ -60,8 +61,12 @@ public class DomainEventController {
         }
         try {
             domainEventService.create(domainEventDTO);
+        } catch (DomainInactiveException ex) {
+            bindingResult.rejectValue("domain", "domainEvent.domain.inactive", ex.getMessage());
+            return "domainEvent/add";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute(WebUtils.MSG_ERROR, WebUtils.getMessage("domainEvent.create.failure"));
+            bindingResult.reject("domainEvent.create.failure", WebUtils.getMessage("domainEvent.create.failure"));
+            return "domainEvent/add";
         }
         redirectAttributes.addFlashAttribute(WebUtils.MSG_SUCCESS, WebUtils.getMessage("domainEvent.create.success"));
         return "redirect:/domainEvents";
@@ -82,7 +87,12 @@ public class DomainEventController {
         if (bindingResult.hasErrors()) {
             return "domainEvent/edit";
         }
-        domainEventService.update(id, domainEventDTO);
+        try {
+            domainEventService.update(id, domainEventDTO);
+        } catch (DomainInactiveException ex) {
+            bindingResult.rejectValue("domain", "domainEvent.domain.inactive", ex.getMessage());
+            return "domainEvent/edit";
+        }
         redirectAttributes.addFlashAttribute(WebUtils.MSG_SUCCESS, WebUtils.getMessage("domainEvent.update.success"));
         return "redirect:/domainEvents";
     }

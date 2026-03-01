@@ -2,7 +2,9 @@ package me.sathish.event_service.domain_event;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import me.sathish.event_service.domain.DomainRepository;
+import me.sathish.event_service.domain.Domain;
+import me.sathish.event_service.domain.DomainConstants;
+import me.sathish.event_service.domain.DomainLookupService;
 import me.sathish.event_service.util.ApplicationProperties;
 import me.sathish.event_service.util.NotFoundException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -15,19 +17,19 @@ import org.springframework.stereotype.Service;
 public class DomainEventService {
 
     private final DomainEventRepository domainEventRepository;
-    private final DomainRepository domainRepository;
+    private final DomainLookupService domainLookupService;
     private final DomainEventMapper domainEventMapper;
     private final RabbitTemplate rabbitTemplate;
     private final ApplicationProperties applicationProperties;
 
     public DomainEventService(
             final DomainEventRepository domainEventRepository,
-            final DomainRepository domainRepository,
+            final DomainLookupService domainLookupService,
             final DomainEventMapper domainEventMapper,
             final RabbitTemplate rabbitTemplate,
             final ApplicationProperties applicationProperties) {
         this.domainEventRepository = domainEventRepository;
-        this.domainRepository = domainRepository;
+        this.domainLookupService = domainLookupService;
         this.domainEventMapper = domainEventMapper;
         this.rabbitTemplate = rabbitTemplate;
         this.applicationProperties = applicationProperties;
@@ -40,20 +42,22 @@ public class DomainEventService {
         //        final List<DomainEvent> domainEvents = domainEventRepository.findAll(Sort.by("id"));
 
         return domainEvents.stream()
-                .map(domainEvent -> domainEventMapper.updateDomainEventDTO(domainEvent, new DomainEventDTO()))
+                .map(this::toDto)
                 .toList();
     }
 
     public DomainEventDTO get(final Long id) {
         return domainEventRepository
                 .findById(id)
-                .map(domainEvent -> domainEventMapper.updateDomainEventDTO(domainEvent, new DomainEventDTO()))
+                .map(this::toDto)
                 .orElseThrow(NotFoundException::new);
     }
 
     public Long create(final DomainEventDTO domainEventDTO) throws Exception {
         final DomainEvent domainEvent = new DomainEvent();
-        domainEventMapper.updateDomainEvent(domainEventDTO, domainEvent, domainRepository);
+        final var domain = resolveAndPopulateDomain(domainEventDTO);
+        domainEventMapper.updateDomainEvent(domainEventDTO, domainEvent);
+        domainEvent.setDomain(domain);
         final DomainEvent savedEvent = domainEventRepository.save(domainEvent);
         // Publish message to RabbitMQ after successful save
         publishDomainEventMessage(domainEventDTO);
@@ -62,7 +66,9 @@ public class DomainEventService {
 
     public void update(final Long id, final DomainEventDTO domainEventDTO) {
         final DomainEvent domainEvent = domainEventRepository.findById(id).orElseThrow(NotFoundException::new);
-        domainEventMapper.updateDomainEvent(domainEventDTO, domainEvent, domainRepository);
+        final var domain = resolveAndPopulateDomain(domainEventDTO);
+        domainEventMapper.updateDomainEvent(domainEventDTO, domainEvent);
+        domainEvent.setDomain(domain);
         domainEventRepository.save(domainEvent);
     }
 
@@ -85,5 +91,24 @@ public class DomainEventService {
             log.error("Failed to publish domain event message: " + e.getMessage());
             throw new RuntimeException("Failed to publish domain event message", e);
         }
+    }
+
+    private DomainEventDTO toDto(DomainEvent domainEvent) {
+        return domainEventMapper.updateDomainEventDTO(domainEvent, new DomainEventDTO());
+    }
+
+    private Domain resolveAndPopulateDomain(DomainEventDTO domainEventDTO) {
+        if (domainEventDTO.getDomain() != null) {
+            final var domain = domainLookupService.ensureActiveDomain(domainEventDTO.getDomain());
+            domainEventDTO.setDomain(domain.getId());
+            domainEventDTO.setDomainName(domain.getDomainName());
+            return domain;
+        } else if (domainEventDTO.getDomainName() != null) {
+            final var domain = domainLookupService.ensureActiveDomain(domainEventDTO.getDomainName());
+            domainEventDTO.setDomain(domain.getId());
+            domainEventDTO.setDomainName(domain.getDomainName());
+            return domain;
+        }
+        return null;
     }
 }

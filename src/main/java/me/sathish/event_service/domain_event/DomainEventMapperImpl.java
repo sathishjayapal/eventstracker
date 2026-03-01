@@ -1,12 +1,15 @@
 package me.sathish.event_service.domain_event;
 
+import lombok.RequiredArgsConstructor;
 import me.sathish.event_service.domain.Domain;
-import me.sathish.event_service.domain.DomainRepository;
-import me.sathish.event_service.util.NotFoundException;
+import me.sathish.event_service.domain.DomainLookupService;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class DomainEventMapperImpl implements DomainEventMapper {
+    private final DomainLookupService domainLookupService;
 
     @Override
     public DomainEventDTO updateDomainEventDTO(DomainEvent domainEvent, DomainEventDTO domainEventDTO) {
@@ -20,16 +23,26 @@ public class DomainEventMapperImpl implements DomainEventMapper {
         domainEventDTO.setPayload(domainEvent.getPayload());
         domainEventDTO.setCreatedBy(domainEvent.getCreatedBy());
         domainEventDTO.setUpdatedBy(domainEvent.getUpdatedBy());
-        domainEventDTO.setDomain(domainEvent.getDomain() == null ? null : domainEvent.getDomain().getId());
+        if (domainEvent.getDomain() != null) {
+            final Domain domainProxy = domainEvent.getDomain();
+            // id is available from proxy without initialization
+            domainEventDTO.setDomain(domainProxy.getId());
+            if (Hibernate.isInitialized(domainProxy)) {
+                domainEventDTO.setDomainName(domainProxy.getDomainName());
+            } else {
+                final Domain initializedDomain = domainLookupService.getDomain(domainProxy.getId());
+                domainEventDTO.setDomainName(initializedDomain.getDomainName());
+            }
+        } else {
+            domainEventDTO.setDomain(null);
+            domainEventDTO.setDomainName(null);
+        }
 
         return domainEventDTO;
     }
 
     @Override
-    public DomainEvent updateDomainEvent(
-            DomainEventDTO domainEventDTO,
-            DomainEvent domainEvent,
-            DomainRepository domainRepository) {
+    public DomainEvent updateDomainEvent(DomainEventDTO domainEventDTO, DomainEvent domainEvent) {
         if (domainEventDTO == null) {
             return domainEvent;
         }
@@ -40,11 +53,9 @@ public class DomainEventMapperImpl implements DomainEventMapper {
         domainEvent.setCreatedBy(domainEventDTO.getCreatedBy());
         domainEvent.setUpdatedBy(domainEventDTO.getUpdatedBy());
 
-        final Domain domain = domainEventDTO.getDomain() == null
+        Domain domain = domainEventDTO.getDomain() == null
                 ? null
-                : domainRepository
-                        .findById(domainEventDTO.getDomain())
-                        .orElseThrow(() -> new NotFoundException("domain not found"));
+                : domainLookupService.ensureActiveDomain(domainEventDTO.getDomain());
         domainEvent.setDomain(domain);
 
         return domainEvent;

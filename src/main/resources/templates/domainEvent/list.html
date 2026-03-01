@@ -29,7 +29,10 @@
                             <td>[[${domainEvent.id}]]</td>
                             <td>[[${domainEvent.eventType}]]</td>
                             <td>[[${domainEvent.payload}]]</td>
-                            <td>[[${domainEvent.domain}]]</td>
+                            <td>
+                                <span th:if="${domainEvent.domainName != null}" th:text="${domainEvent.domainName}"></span>
+                                <span th:if="${domainEvent.domainName == null}" class="text-muted">N/A</span>
+                            </td>
                             <td>
                                 <div class="float-end text-nowrap">
                                     <a th:href="@{/domainEvents/edit/{id}(id=${domainEvent.id})}" class="btn btn-sm btn-secondary">[[#{domainEvent.list.edit}]]</a>
