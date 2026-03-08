@@ -1,4 +1,11 @@
 spring:
+  docker:
+    compose:
+      enabled: false
+      start:
+        skip: if_running
+      lifecycle-management: none
+
   datasource:
     url: ${eventstracker_JDBC_DATABASE_URL:jdbc:postgresql://localhost:5445/eventstracker_db}
     username: ${eventstracker_JDBC_DATABASE_USERNAME:postgres}
@@ -17,9 +24,6 @@ spring:
             non_contextual_creation: true
         id:
           new_generator_mappings: true
-  docker:
-    compose:
-      enabled: false
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
@@ -49,8 +53,9 @@ server:
   processRunEvents:
     fixedRate: 10000
 sathishprojects:
-  sathish_project_events_exchange: x.sathishprojects.events
-  github_routing_key: github.operations.crud
+  sathish_project_events_exchange: x.sathishprojects.fanout
+  github_routing_key: sathishprojects.github.api.event
+  garmin_routing_key: sathishprojects.garmin.api.event
 # Event Domain User Configuration
 eventDomainUser: ${EVENT_DOMAIN_USER:user}
 eventDomainUserPassword: ${EVENT_DOMAIN_USER_PASSWORD:pass}

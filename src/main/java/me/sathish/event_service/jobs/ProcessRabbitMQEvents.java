@@ -1,7 +1,7 @@
 package me.sathish.event_service.jobs;
 
 import lombok.extern.slf4j.Slf4j;
-import me.sathish.event_service.config.RabbitMQConfiguration;
+import me.sathish.event_service.config.RabbitSchemaConfig;
 import me.sathish.event_service.domain.DomainConstants;
 import me.sathish.event_service.domain.DomainLookupService;
 import me.sathish.event_service.domain.DomainRepository;
@@ -33,7 +33,7 @@ public class ProcessRabbitMQEvents {
     }
 
     @Transactional
-    @RabbitListener(queues = RabbitMQConfiguration.GITHUB_QUEUE)
+    @RabbitListener(queues = RabbitSchemaConfig.GITHUB_API_EVENTS_QUEUE)
     public void processGitHubEvents(DomainEventDTO domainEventDTO) {
         //        LockAssert.assertLocked();
         if (domainEventDTO == null) {
@@ -68,7 +68,7 @@ public class ProcessRabbitMQEvents {
     }
 
     @Transactional
-    @RabbitListener(queues = RabbitMQConfiguration.GARMIN_QUEUE)
+    @RabbitListener(queues = RabbitSchemaConfig.GARMIN_API_EVENTS_QUEUE)
     public void processGarminEvents(String eventPayload) {
        if (eventPayload == null) {
             log.error("Received null payload from Garmin queue, skipping processing.");
