@@ -7,12 +7,14 @@ import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.event_domain_user.EventDomainUserRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 @Component
 @Slf4j
+@Order(2)
 public class DomainDataLoader implements ApplicationRunner {
     private static final String RUNS_NAME_PROP = "eventTracker.domain.runs.name";
     private static final String RUNS_STATUS_PROP = "eventTracker.domain.runs.status";

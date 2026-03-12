@@ -1,5 +1,6 @@
 package me.sathish.event_service.domain_event;
 
+import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import me.sathish.event_service.domain.Domain;
 import me.sathish.event_service.domain.DomainLookupService;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class DomainEventMapperImpl implements DomainEventMapper {
+    private static final DateTimeFormatter DATETIME_LOCAL_FORMAT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
     private final DomainLookupService domainLookupService;
 
     @Override
@@ -23,6 +26,12 @@ public class DomainEventMapperImpl implements DomainEventMapper {
         domainEventDTO.setPayload(domainEvent.getPayload());
         domainEventDTO.setCreatedBy(domainEvent.getCreatedBy());
         domainEventDTO.setUpdatedBy(domainEvent.getUpdatedBy());
+        if (domainEvent.getDateCreated() != null) {
+            domainEventDTO.setDateCreated(domainEvent.getDateCreated().format(DATETIME_LOCAL_FORMAT));
+        }
+        if (domainEvent.getLastUpdated() != null) {
+            domainEventDTO.setLastUpdated(domainEvent.getLastUpdated().format(DATETIME_LOCAL_FORMAT));
+        }
         if (domainEvent.getDomain() != null) {
             final Domain domainProxy = domainEvent.getDomain();
             // id is available from proxy without initialization

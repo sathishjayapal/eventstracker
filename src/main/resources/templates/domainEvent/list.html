@@ -1,5 +1,6 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
         layout:decorate="~{layout}">
     <head>
         <title>[[#{domainEvent.list.headline}]]</title>
@@ -34,7 +35,7 @@
                                 <span th:if="${domainEvent.domainName == null}" class="text-muted">N/A</span>
                             </td>
                             <td>
-                                <div class="float-end text-nowrap">
+                                <div sec:authorize="hasAuthority('ADMIN')" class="float-end text-nowrap">
                                     <a th:href="@{/domainEvents/edit/{id}(id=${domainEvent.id})}" class="btn btn-sm btn-secondary">[[#{domainEvent.list.edit}]]</a>
                                     <form th:action="@{/domainEvents/delete/{id}(id=${domainEvent.id})}"
                                             th:data-confirm-message="#{delete.confirm}" method="post" class="js-submit-confirm d-inline">

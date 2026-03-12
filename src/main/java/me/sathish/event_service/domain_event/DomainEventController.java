@@ -21,7 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/domainEvents")
-@PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
+@PreAuthorize("hasAnyAuthority('" + UserRoles.AUTH_USER + "', '" + UserRoles.ADMIN + "')")
 public class DomainEventController {
 
     private final DomainEventService domainEventService;
@@ -73,12 +73,14 @@ public class DomainEventController {
     }
 
     @GetMapping("/edit/{id}")
+    @PreAuthorize("hasAuthority('" + UserRoles.ADMIN + "')")
     public String edit(@PathVariable(name = "id") final Long id, final Model model) {
         model.addAttribute("domainEvent", domainEventService.get(id));
         return "domainEvent/edit";
     }
 
     @PostMapping("/edit/{id}")
+    @PreAuthorize("hasAuthority('" + UserRoles.ADMIN + "')")
     public String edit(
             @PathVariable(name = "id") final Long id,
             @ModelAttribute("domainEvent") @Valid final DomainEventDTO domainEventDTO,
@@ -98,6 +100,7 @@ public class DomainEventController {
     }
 
     @PostMapping("/delete/{id}")
+    @PreAuthorize("hasAuthority('" + UserRoles.ADMIN + "')")
     public String delete(@PathVariable(name = "id") final Long id, final RedirectAttributes redirectAttributes) {
         domainEventService.delete(id);
         redirectAttributes.addFlashAttribute(WebUtils.MSG_INFO, WebUtils.getMessage("domainEvent.delete.success"));

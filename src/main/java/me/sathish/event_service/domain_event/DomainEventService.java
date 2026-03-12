@@ -10,6 +10,7 @@ import me.sathish.event_service.util.NotFoundException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -54,6 +55,9 @@ public class DomainEventService {
     }
 
     public Long create(final DomainEventDTO domainEventDTO) throws Exception {
+        final String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        domainEventDTO.setCreatedBy(currentUser);
+        domainEventDTO.setUpdatedBy(currentUser);
         final DomainEvent domainEvent = new DomainEvent();
         final var domain = resolveAndPopulateDomain(domainEventDTO);
         domainEventMapper.updateDomainEvent(domainEventDTO, domainEvent);
@@ -65,7 +69,10 @@ public class DomainEventService {
     }
 
     public void update(final Long id, final DomainEventDTO domainEventDTO) {
+        final String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        domainEventDTO.setUpdatedBy(currentUser);
         final DomainEvent domainEvent = domainEventRepository.findById(id).orElseThrow(NotFoundException::new);
+        domainEventDTO.setCreatedBy(domainEvent.getCreatedBy());
         final var domain = resolveAndPopulateDomain(domainEventDTO);
         domainEventMapper.updateDomainEvent(domainEventDTO, domainEvent);
         domainEvent.setDomain(domain);

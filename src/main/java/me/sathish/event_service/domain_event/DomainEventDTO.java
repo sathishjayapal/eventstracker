@@ -17,13 +17,18 @@ public class DomainEventDTO {
 
     @NotNull private String payload;
 
-    @NotNull @Size(max = 255)
+    @Size(max = 255)
     private String createdBy;
 
-    @NotNull @Size(max = 255)
+    @Size(max = 255)
     private String updatedBy;
 
+    @NotNull
     private Long domain;
 
     private String domainName;
+
+    private String dateCreated;
+
+    private String lastUpdated;
 }

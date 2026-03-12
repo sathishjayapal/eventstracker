@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/domains")
 @Slf4j
-@PreAuthorize("hasAuthority('" + UserRoles.AUTH_USER + "')")
+@PreAuthorize("hasAnyAuthority('" + UserRoles.AUTH_USER + "', '" + UserRoles.ADMIN + "')")
 public class DomainController {
 
     private final DomainService domainService;

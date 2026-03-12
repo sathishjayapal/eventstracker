@@ -18,7 +18,7 @@
                 <span>[[#{__${object}__.__${field}__.label} + ${required == true ? '*' : ''}]]</span>
             </label>
             <div th:if="${type != 'checkbox'}" class="col-md-10">
-                <input th:if="${type == 'text' || type == 'password' || type == 'email' || type == 'tel' || type == 'number'}"
+                <input th:if="${type == 'text' || type == 'password' || type == 'email' || type == 'tel' || type == 'number' || type == 'datetime-local'}"
                         th:type="${type}" th:field="*{__${field}__}" th:disabled="${disabled}"
                         th:classappend="${inputClassappend}" class="form-control" />
                 <textarea th:if="${type == 'textarea'}" th:field="*{__${field}__}" th:disabled="${disabled}"

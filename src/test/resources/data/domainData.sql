@@ -1,3 +1,5 @@
+
+
 INSERT INTO domain (
     id,
     domain_name,

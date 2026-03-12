@@ -39,3 +39,17 @@ INSERT INTO event_domain_user (
     '2024-09-04 14:30:00',
     '2024-09-04 14:30:00'
 );
+
+INSERT INTO event_domain_user (
+    id,
+    username,
+    hash,
+    date_created,
+    last_updated
+) VALUES (
+    1203,
+    'sathishadmin',
+    '{bcrypt}$2a$10$iBrEj2cm239/hodDoXeeROBIw1t2wk4V3SI2i94ZD.KF6E7uCXT2i',
+    '2024-09-04 14:30:00',
+    '2024-09-04 14:30:00'
+);

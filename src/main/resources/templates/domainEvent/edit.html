@@ -18,9 +18,11 @@
                 <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='eventId', required=true, type='textarea')}" />
                 <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='eventType', required=true, type='textarea')}" />
                 <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='payload', required=true, type='textarea')}" />
-                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='createdBy', required=true)}" />
-                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='updatedBy', required=true)}" />
                 <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='domain', type='select')}" />
+                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='createdBy', disabled=true)}" />
+                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='updatedBy', disabled=true)}" />
+                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='dateCreated', disabled=true, type='datetime-local')}" />
+                <div th:replace="~{fragments/forms::inputRow(object='domainEvent', field='lastUpdated', disabled=true, type='datetime-local')}" />
                 <input type="submit" th:value="#{domainEvent.edit.headline}" class="btn btn-primary mt-4" />
             </form>
         </div>
