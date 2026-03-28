@@ -7,9 +7,9 @@ spring:
       lifecycle-management: none
 
   datasource:
-    url: ${eventstracker_JDBC_DATABASE_URL:jdbc:postgresql://localhost:5445/eventstracker_db}
+    url: ${eventstracker_JDBC_DATABASE_URL:jdbc:postgresql://localhost:5432/eventstracker_db}
     username: ${eventstracker_JDBC_DATABASE_USERNAME:postgres}
-    password: ${eventstracker_JDBC_DATABASE_PASSWORD:P4ssword!}
+    password: ${eventstracker_JDBC_DATABASE_PASSWORD}
     hikari:
       connection-timeout: 50000
       maximum-pool-size: 10
@@ -27,8 +27,8 @@ spring:
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:guest}
-    password: ${RABBITMQ_PASSWORD:guest}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
 error:
   handling:
     http-status-in-json-response: true
@@ -58,7 +58,7 @@ sathishprojects:
   garmin_routing_key: sathishprojects.garmin.api.event
 # Event Domain User Configuration
 eventDomainUser: ${EVENT_DOMAIN_USER:sathish}
-eventDomainUserPassword: ${EVENT_DOMAIN_USER_PASSWORD:pass}
+eventDomainUserPassword: ${EVENT_DOMAIN_USER_PASSWORD}
 decorator:
   datasource:
     p6spy:
