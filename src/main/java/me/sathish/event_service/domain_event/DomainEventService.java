@@ -47,6 +47,11 @@ public class DomainEventService {
                 .toList();
     }
 
+    public org.springframework.data.domain.Page<DomainEventDTO> findAllPaged(Pageable pageable) {
+        return domainEventRepository.findAll(pageable)
+                .map(this::toDto);
+    }
+
     public DomainEventDTO get(final Long id) {
         return domainEventRepository
                 .findById(id)

@@ -13,6 +13,54 @@
                     <a th:href="@{/domainEvents/add}" class="btn btn-primary ms-2">[[#{domainEvent.list.createNew}]]</a>
                 </div>
             </div>
+            
+            <!-- Sorting and Page Size Controls -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <form method="get" action="/domainEvents" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="sortBy" class="form-label">Sort By</label>
+                            <select name="sortBy" id="sortBy" class="form-select" th:value="${sortBy}">
+                                <option value="id" th:selected="${sortBy == 'id'}">ID</option>
+                                <option value="eventType" th:selected="${sortBy == 'eventType'}">Event Type</option>
+                                <option value="dateCreated" th:selected="${sortBy == 'dateCreated'}">Date Created</option>
+                                <option value="lastUpdated" th:selected="${sortBy == 'lastUpdated'}">Last Updated</option>
+                                <option value="domain.id" th:selected="${sortBy == 'domain.id'}">Domain</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="sortDirection" class="form-label">Sort Direction</label>
+                            <select name="sortDirection" id="sortDirection" class="form-select" th:value="${sortDirection}">
+                                <option value="ASC" th:selected="${sortDirection == 'ASC'}">Ascending</option>
+                                <option value="DESC" th:selected="${sortDirection == 'DESC'}">Descending</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="pageSize" class="form-label">Items per Page</label>
+                            <select name="pageSize" id="pageSize" class="form-select" th:value="${pageSize}">
+                                <option value="10" th:selected="${pageSize == 10}">10</option>
+                                <option value="20" th:selected="${pageSize == 20}">20</option>
+                                <option value="50" th:selected="${pageSize == 50}">50</option>
+                                <option value="100" th:selected="${pageSize == 100}">100</option>
+                                <option value="200" th:selected="${pageSize == 200}">200</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Apply</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Results Info -->
+            <div class="mb-3" th:if="${!domainEvents.empty}">
+                <p class="text-muted">
+                    Showing [[${domainEvents.number * domainEvents.size + 1}]] to 
+                    [[${domainEvents.number * domainEvents.size + domainEvents.numberOfElements}]] 
+                    of [[${domainEvents.totalElements}]] events
+                </p>
+            </div>
+            
             <div th:if="${domainEvents.empty}">[[#{domainEvent.list.empty}]]</div>
             <div th:if="${!domainEvents.empty}" class="table-responsive">
                 <table class="table table-striped table-hover align-middle">
@@ -22,6 +70,7 @@
                             <th scope="col">[[#{domainEvent.eventType.label}]]</th>
                             <th scope="col">[[#{domainEvent.payload.label}]]</th>
                             <th scope="col">[[#{domainEvent.domain.label}]]</th>
+                            <th scope="col">Date Created</th>
                             <th><!-- --></th>
                         </tr>
                     </thead>
@@ -33,6 +82,10 @@
                             <td>
                                 <span th:if="${domainEvent.domainName != null}" th:text="${domainEvent.domainName}"></span>
                                 <span th:if="${domainEvent.domainName == null}" class="text-muted">N/A</span>
+                            </td>
+                            <td>
+                                <span th:if="${domainEvent.dateCreated != null}" th:text="${domainEvent.dateCreated}"></span>
+                                <span th:if="${domainEvent.dateCreated == null}" class="text-muted">N/A</span>
                             </td>
                             <td>
                                 <div sec:authorize="hasAuthority('ADMIN')" class="float-end text-nowrap">
@@ -47,6 +100,53 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Pagination Controls -->
+            <nav th:if="${!domainEvents.empty && domainEvents.totalPages > 1}" aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <!-- First Page -->
+                    <li class="page-item" th:classappend="${domainEvents.first} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/domainEvents(page=0, pageSize=${pageSize}, sortBy=${sortBy}, sortDirection=${sortDirection})}">
+                            First
+                        </a>
+                    </li>
+                    
+                    <!-- Previous Page -->
+                    <li class="page-item" th:classappend="${!domainEvents.hasPrevious()} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/domainEvents(page=${domainEvents.number - 1}, pageSize=${pageSize}, sortBy=${sortBy}, sortDirection=${sortDirection})}">
+                            Previous
+                        </a>
+                    </li>
+                    
+                    <!-- Page Numbers -->
+                    <li class="page-item" 
+                        th:each="pageNum : ${#numbers.sequence(0, domainEvents.totalPages - 1)}"
+                        th:if="${pageNum >= domainEvents.number - 2 && pageNum <= domainEvents.number + 2}"
+                        th:classappend="${pageNum == domainEvents.number} ? 'active'">
+                        <a class="page-link" 
+                           th:href="@{/domainEvents(page=${pageNum}, pageSize=${pageSize}, sortBy=${sortBy}, sortDirection=${sortDirection})}"
+                           th:text="${pageNum + 1}">1</a>
+                    </li>
+                    
+                    <!-- Next Page -->
+                    <li class="page-item" th:classappend="${!domainEvents.hasNext()} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/domainEvents(page=${domainEvents.number + 1}, pageSize=${pageSize}, sortBy=${sortBy}, sortDirection=${sortDirection})}">
+                            Next
+                        </a>
+                    </li>
+                    
+                    <!-- Last Page -->
+                    <li class="page-item" th:classappend="${domainEvents.last} ? 'disabled'">
+                        <a class="page-link" 
+                           th:href="@{/domainEvents(page=${domainEvents.totalPages - 1}, pageSize=${pageSize}, sortBy=${sortBy}, sortDirection=${sortDirection})}">
+                            Last
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </body>
 </html>

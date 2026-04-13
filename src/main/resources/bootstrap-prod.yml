@@ -1,0 +1,16 @@
+spring:
+  cloud:
+    config:
+      uri: ${CONFIG_SERVER_URL:http://sathish-config-server:8888}
+      fail-fast: true
+      enabled: true
+      retry:
+        max-attempts: 10
+        initial-interval: 2000
+        max-interval: 5000
+        multiplier: 1.2
+
+# Production settings
+logging:
+  level:
+    org.springframework.cloud.config: INFO

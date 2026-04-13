@@ -7,7 +7,10 @@ import me.sathish.event_service.domain.DomainInactiveException;
 import me.sathish.event_service.security.UserRoles;
 import me.sathish.event_service.util.CustomCollectors;
 import me.sathish.event_service.util.WebUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -41,8 +45,28 @@ public class DomainEventController {
     }
 
     @GetMapping
-    public String list(final Model model) {
-        model.addAttribute("domainEvents", domainEventService.findAll());
+    public String list(
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) final Pageable pageable,
+            @RequestParam(required = false, defaultValue = "20") final Integer pageSize,
+            @RequestParam(required = false, defaultValue = "id") final String sortBy,
+            @RequestParam(required = false, defaultValue = "DESC") final String sortDirection,
+            final Model model) {
+        
+        // Create custom pageable with user-selected options
+        Pageable customPageable = org.springframework.data.domain.PageRequest.of(
+                pageable.getPageNumber(),
+                pageSize,
+                Sort.Direction.fromString(sortDirection),
+                sortBy
+        );
+        
+        Page<DomainEventDTO> page = domainEventService.findAllPaged(customPageable);
+        
+        model.addAttribute("domainEvents", page);
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDirection", sortDirection);
+        
         return "domainEvent/list";
     }
 

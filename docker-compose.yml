@@ -1,29 +1,31 @@
 # EventTracker Development Database
-# Central event hub - start with: docker-compose up -d
-# Stop with: docker-compose down
+# DEPRECATED: Use ./eventtracker.sh deps instead
+# This starts PostgreSQL from jubilant-memory/config/docker-compose.yml on port 6433
+# This local config is disabled - do NOT use this
 
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15
-    container_name: eventstracker-postgres
-    environment:
-      POSTGRES_USER: ${DB_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-eventstracker_db}
-    ports:
-      - "5432:5432"  # Default PostgreSQL port
-    volumes:
-      - eventstracker_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - eventstracker-network
+  # DISABLED: Use centralized PostgreSQL from jubilant-memory instead
+  # postgres:
+  #   image: postgres:15
+  #   container_name: eventstracker-postgres
+  #   environment:
+  #     POSTGRES_USER: ${DB_USERNAME:-postgres}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+  #     POSTGRES_DB: ${DB_NAME:-eventstracker_db}
+  #   ports:
+  #     - "5432:5432"  # Default PostgreSQL port
+  #   volumes:
+  #     - eventstracker_data:/var/lib/postgresql/data
+  #     - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - eventstracker-network
 
   # Optional: pgAdmin for visual database management
   pgadmin:
