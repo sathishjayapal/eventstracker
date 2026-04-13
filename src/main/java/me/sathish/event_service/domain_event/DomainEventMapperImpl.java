@@ -1,5 +1,6 @@
 package me.sathish.event_service.domain_event;
 
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import me.sathish.event_service.domain.Domain;
@@ -10,8 +11,9 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class DomainEventMapperImpl implements DomainEventMapper {
+    private static final ZoneId CST_ZONE = ZoneId.of("America/Chicago");
     private static final DateTimeFormatter DATETIME_LOCAL_FORMAT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(CST_ZONE);
     private final DomainLookupService domainLookupService;
 
     @Override
