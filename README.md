@@ -22,9 +22,9 @@ EventsTracker is a Spring Boot service for event ingestion and tracking with Pos
    ```
 
 Detailed setup and troubleshooting:
-- `/home/runner/work/eventstracker/eventstracker/SETUP_GUIDE.md`
-- `/home/runner/work/eventstracker/eventstracker/RUN_FROM_INTELLIJ.md`
-- `/home/runner/work/eventstracker/eventstracker/CONFIG_SERVER_SETUP.md`
+- `SETUP_GUIDE.md`
+- `RUN_FROM_INTELLIJ.md`
+- `CONFIG_SERVER_SETUP.md`
 
 ## README Update Policy
 
@@ -32,7 +32,7 @@ This repository enforces README freshness in CI:
 
 - If important project files change (for example `src/**`, `pom.xml`, `docker-compose.yml`, `init.sql`, or operational scripts/guides), at least one README must also be updated.
 - Accepted README targets:
-  - `/home/runner/work/eventstracker/eventstracker/README.md`
-  - `/home/runner/work/eventstracker/eventstracker/docs/README.md`
+  - `README.md`
+  - `docs/README.md`
 
 If your change affects behavior, architecture, configuration, setup, or operations, update the README in the same check-in so documentation always reflects the true state of the project.

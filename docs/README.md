@@ -7,8 +7,8 @@ To keep EventsTracker in a true and readable state for everyone:
 - Any important code/configuration/operational change must include a README update in the same check-in.
 - CI now enforces this through `.github/workflows/readme-guard.yml`.
 - For EventsTracker updates, use:
-  - `/home/runner/work/eventstracker/eventstracker/README.md`
-  - `/home/runner/work/eventstracker/eventstracker/docs/README.md`
+  - `README.md`
+  - `docs/README.md`
 
 If implementation changes are not reflected in README, the check-in should be considered incomplete.
 
