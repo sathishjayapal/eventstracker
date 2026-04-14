@@ -16,22 +16,61 @@ RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Configuration
-CONTAINER_NAME="event-service-db"
-DB_NAME="event-service"
-DB_USER="psqladmin"
-DB_PASSWORD="psqladminpas$"
-DB_PORT=6433
-APP_PORT=9081
-
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-
+# Helper functions (needed early for error messages)
 print_status() { echo -e "${GREEN}✓${NC} $1"; }
 print_error() { echo -e "${RED}✗${NC} $1"; }
 print_info() { echo -e "${YELLOW}ℹ${NC} $1"; }
 print_header() { echo -e "\n${BLUE}$1${NC}"; }
+
+# Configuration
+CONTAINER_NAME="event-service-db"
+DB_PORT=6433
+APP_PORT=9081
+
+# Load .env file — required for all commands
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    set -a
+    source "$SCRIPT_DIR/.env"
+    set +a
+else
+    print_error ".env file not found in $SCRIPT_DIR"
+    print_info "Create a .env file with the required variables (see README)"
+    exit 1
+fi
+
+# Validate required variables
+require_env() {
+    local var_name=$1
+    if [ -z "${!var_name}" ]; then
+        print_error "Required variable $var_name is not set in .env"
+        exit 1
+    fi
+}
+
+validate_env() {
+    local missing=0
+    for var in EVENTS_TRACKER_DB_URL EVENTS_TRACKER_DB_USER EVENTS_TRACKER_DB_PASSWORD \
+               RABBITMQ_HOST RABBITMQ_PORT RABBITMQ_USERNAME RABBITMQ_PASSWORD \
+               EVENT_DOMAIN_USER EVENT_DOMAIN_USER_PASSWORD; do
+        if [ -z "${!var}" ]; then
+            print_error "Missing required variable: $var"
+            missing=$((missing + 1))
+        fi
+    done
+    if [ $missing -gt 0 ]; then
+        print_info "Check your .env file — all variables above are required"
+        exit 1
+    fi
+}
+
+# Extract DB connection parts from JDBC URL for Docker/pg_isready usage
+DB_NAME=$(echo "$EVENTS_TRACKER_DB_URL" | sed -n 's|.*://[^/]*/\([^?]*\).*|\1|p')
+DB_USER="$EVENTS_TRACKER_DB_USER"
+DB_PASSWORD="$EVENTS_TRACKER_DB_PASSWORD"
+
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
 
 find_directory() {
     local name=$1
@@ -67,6 +106,7 @@ cleanup_stale_containers() {
 }
 
 cmd_deps() {
+    validate_env
     print_header "Starting Infrastructure"
 
     # Find directories
@@ -89,17 +129,11 @@ cmd_deps() {
     print_status "Found config server: $CONFIG_DIR"
     print_status "Found infrastructure: $INFRA_DIR"
 
-    # Load environment
-    print_info "Loading environment variables..."
-    set -a
-    source "$CONFIG_DIR/.env"
-    set +a
-
     # Clean up stale containers before starting
     print_info "Checking for stale containers..."
     cleanup_stale_containers
 
-    # Start config server
+    # Start config server (uses config-server's own .env for GIT_URI, encrypt_key, etc.)
     print_info "Starting Config Server..."
     cd "$CONFIG_DIR"
     docker-compose --env-file .env up -d config-server
@@ -114,7 +148,7 @@ cmd_deps() {
         sleep 1
     done
 
-    # Start infrastructure
+    # Start infrastructure (uses config-server's .env for infra compose vars)
     print_info "Starting PostgreSQL and RabbitMQ..."
     cd "$INFRA_DIR"
     docker-compose --env-file "$CONFIG_DIR/.env" up -d postgres sathishproject-rabbitmq
@@ -122,8 +156,9 @@ cmd_deps() {
     sleep 3
     print_status "Infrastructure started"
     print_info "Config Server: http://localhost:8888"
-    print_info "PostgreSQL: localhost:6433"
-    print_info "RabbitMQ: localhost:5672"
+    print_info "PostgreSQL: localhost:$DB_PORT"
+    print_info "RabbitMQ: localhost:$RABBITMQ_PORT"
+    print_info "All env vars loaded from $SCRIPT_DIR/.env"
 }
 
 # ============================================================================
@@ -168,31 +203,10 @@ cmd_dev() {
         sleep 1
     done
 
-    # Create .env file with config server and database credentials
-    cat > .env << EOF
-DB_HOST=localhost
-DB_PORT=$DB_PORT
-DB_NAME=$DB_NAME
-DB_USERNAME=$DB_USER
-DB_PASSWORD=$DB_PASSWORD
-JDBC_DATABASE_URL=jdbc:postgresql://localhost:$DB_PORT/$DB_NAME
-eventstracker_JDBC_DATABASE_URL=jdbc:postgresql://localhost:$DB_PORT/$DB_NAME
-eventstracker_JDBC_DATABASE_USERNAME=$DB_USER
-eventstracker_JDBC_DATABASE_PASSWORD=$DB_PASSWORD
-RABBITMQ_HOST=localhost
-RABBITMQ_PORT=5672
-RABBITMQ_USERNAME=guest
-RABBITMQ_PASSWORD=guest
-SERVER_PORT=$APP_PORT
-username=sathish
-pass=pass
-SPRING_CLOUD_CONFIG_USERNAME=sathish
-SPRING_CLOUD_CONFIG_PASSWORD=pass
-CONFIG_SERVER_URL=http://localhost:8888
-SPRING_PROFILES_ACTIVE=local
-EOF
-
-    print_status ".env file created"
+    if [ ! -f ".env" ]; then
+        print_error ".env file not found — create a .env with the required variables"
+        return 1
+    fi
     print_status "Development environment ready"
     print_info "Run: mvn spring-boot:run"
 }
@@ -206,23 +220,14 @@ cmd_start() {
 
     cmd_deps
 
-    # Load .env file for config server credentials
-    if [ -f ".env" ]; then
-        print_info "Loading credentials from .env"
-        set -a
-        source .env
-        set +a
-    fi
+    validate_env
 
     print_header "Starting EventTracker"
-    export SPRING_PROFILES_ACTIVE=local
-    export CONFIG_SERVER_URL=http://localhost:8888
-    export SPRING_CLOUD_CONFIG_USERNAME=${username:-sathish}
-    export SPRING_CLOUD_CONFIG_PASSWORD=${pass:-pass}
+    export SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-local}
+    export CONFIG_SERVER_URL=${CONFIG_SERVER_URL:-http://localhost:8888}
 
     print_info "Profile: $SPRING_PROFILES_ACTIVE"
     print_info "Config Server: $CONFIG_SERVER_URL"
-    print_info "Config Server Auth: $SPRING_CLOUD_CONFIG_USERNAME"
 
     if ! command -v mvn &> /dev/null; then
         print_error "Maven not found. Please ensure Maven is installed"
