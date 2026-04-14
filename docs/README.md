@@ -1,5 +1,17 @@
 # 🛠️ Sathish Jayapal – Laboratory of Systems & Resilience
 
+## 📌 EventsTracker Documentation Freshness Policy
+
+To keep EventsTracker in a true and readable state for everyone:
+
+- Any important code/configuration/operational change must include a README update in the same check-in.
+- CI now enforces this through `.github/workflows/readme-guard.yml`.
+- For EventsTracker updates, use:
+  - `README.md`
+  - `docs/README.md`
+
+If implementation changes are not reflected in README, the check-in should be considered incomplete.
+
 **Cloud Architect | Event-Driven Systems Builder | Marathon Runner | Learning in Public**
 
 I design distributed systems for cloud platforms and explore how **resilience principles** from endurance sports apply to building reliable software. This is my laboratory — where architecture thinking meets code, and theory meets the constraints of running real applications.
