@@ -103,6 +103,19 @@ find_consolidated_root() {
         fi
     done
 
+    # Not found locally — try to clone from GitHub into ~/IdeaProjects
+    local clone_target="$HOME/IdeaProjects/consolidated-postgres"
+    if command -v git &>/dev/null; then
+        print_info "consolidated-postgres not found locally — cloning from GitHub..."
+        if git clone https://github.com/sathishjayapal/consolidated-postgres.git "$clone_target" 2>/dev/null; then
+            print_status "consolidated-postgres cloned to $clone_target"
+            echo "$clone_target"
+            return 0
+        else
+            print_error "Failed to clone consolidated-postgres from GitHub"
+        fi
+    fi
+
     return 1
 }
 
@@ -111,8 +124,9 @@ sync_machine_local_envs() {
     consolidated_root=$(find_consolidated_root || true)
 
     if [ -z "$consolidated_root" ]; then
-        print_info "consolidated-postgres not found; skipping env bootstrap"
-        return 0
+        print_error "consolidated-postgres not found and could not be cloned from GitHub"
+        print_info "Clone it manually: git clone https://github.com/sathishjayapal/consolidated-postgres.git \$HOME/IdeaProjects/consolidated-postgres"
+        return 1
     fi
 
     local bootstrap_script="$consolidated_root/scripts/local/bootstrap-env.sh"
