@@ -224,7 +224,7 @@ spring.cloud.config.uri: ${CONFIG_SERVER_URL:http://sathish-config-server:8888}
 
 2. Test database connection:
    ```bash
-   psql -h localhost -p 6433 -U psqladmin -d event-service
+   psql -h localhost -p 6433 -U eventsvc_local -d event-service
    ```
 
 3. Check config server returned correct DB URL:

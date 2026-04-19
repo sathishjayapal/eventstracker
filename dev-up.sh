@@ -158,17 +158,28 @@ done
 print_status "PostgreSQL ready on :$DB_PORT"
 
 # Keep DB role in sync with configured credentials (handles existing containers)
-print_info "Synchronizing database role for EVENTS_TRACKER_DB_USER..."
-_role_exists=$(docker exec -u postgres "$CONTAINER_NAME" psql -d postgres -t -A -c "SELECT 1 FROM pg_roles WHERE rolname='${EVENTS_TRACKER_DB_USER}'" 2>/dev/null || true)
-if [ "$_role_exists" != "1" ]; then
-  docker exec -u postgres "$CONTAINER_NAME" psql -d postgres -c "CREATE ROLE \"${EVENTS_TRACKER_DB_USER}\" LOGIN PASSWORD '${EVENTS_TRACKER_DB_PASSWORD}';" >/dev/null
-  print_status "Created DB role: ${EVENTS_TRACKER_DB_USER}"
-else
-  docker exec -u postgres "$CONTAINER_NAME" psql -d postgres -c "ALTER ROLE \"${EVENTS_TRACKER_DB_USER}\" WITH LOGIN PASSWORD '${EVENTS_TRACKER_DB_PASSWORD}';" >/dev/null
-  print_status "Updated DB role password: ${EVENTS_TRACKER_DB_USER}"
+if [ -z "$EVENTS_TRACKER_DB_USER" ]; then
+  print_error "EVENTS_TRACKER_DB_USER is empty — cannot sync role"; exit 1
 fi
 
-docker exec -u postgres "$CONTAINER_NAME" psql -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE \"${DB_NAME}\" TO \"${EVENTS_TRACKER_DB_USER}\";" >/dev/null || true
+# Detect the actual superuser inside the running container.
+# POSTGRES_USER is set at container init time and may differ from the current .env value.
+_superuser=$(docker exec "$CONTAINER_NAME" printenv POSTGRES_USER 2>/dev/null || echo "postgres")
+print_info "Container superuser: '${_superuser}', desired DB user: '${EVENTS_TRACKER_DB_USER}'"
+
+# Idempotent: create role if missing, always sync password and grants
+docker exec "$CONTAINER_NAME" psql -U "$_superuser" -d postgres -c \
+  "DO \$\$
+   BEGIN
+     CREATE ROLE \"${EVENTS_TRACKER_DB_USER}\" LOGIN PASSWORD '${EVENTS_TRACKER_DB_PASSWORD}';
+   EXCEPTION WHEN duplicate_object THEN NULL;
+   END \$\$;" >/dev/null
+docker exec "$CONTAINER_NAME" psql -U "$_superuser" -d postgres -c \
+  "ALTER ROLE \"${EVENTS_TRACKER_DB_USER}\" WITH LOGIN PASSWORD '${EVENTS_TRACKER_DB_PASSWORD}';" >/dev/null
+print_status "DB role synced: ${EVENTS_TRACKER_DB_USER}"
+
+docker exec "$CONTAINER_NAME" psql -U "$_superuser" -d postgres -c \
+  "GRANT ALL PRIVILEGES ON DATABASE \"${DB_NAME}\" TO \"${EVENTS_TRACKER_DB_USER}\";" >/dev/null || true
 
 # Write .env with local Docker values, preserving app-level secrets
 cat > .env << EOF

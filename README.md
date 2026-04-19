@@ -16,6 +16,7 @@ EventsTracker is a Spring Boot service for event ingestion and tracking with Pos
    ```bash
    ./eventtracker.sh deps
    ```
+   This now uses the consolidated local-db flow (`dev-up.sh` + `jubilant-memory/config/.env`) so DB credentials stay consistent.
 3. Start the app:
    ```bash
    ./mvnw spring-boot:run

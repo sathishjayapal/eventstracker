@@ -7,7 +7,7 @@ Consider the following:
 If you want an embedded database (H2, HSQL or Derby), please put it on the classpath.
 ```
 
-This means: **PostgreSQL is not running or not connected**
+This means: **PostgreSQL is not running or app config values were not loaded**
 
 ---
 
@@ -18,7 +18,7 @@ This means: **PostgreSQL is not running or not connected**
 Open a terminal and run:
 
 ```bash
-cd /path/to/eventstracker
+cd /Users/skminfotech/IdeaProjects/eventstracker
 ./eventtracker.sh deps
 ```
 
@@ -31,37 +31,31 @@ Wait for output like:
 ℹ RabbitMQ: localhost:5672
 ```
 
-**Leave this terminal running.** Do NOT close it.
+You can close this terminal after it finishes. Services run detached in Docker.
 
 ---
 
 ### STEP 2: Open EventTracker in IntelliJ
 
 1. File → Open
-2. Select: `/path/to/eventstracker`
+2. Select: `/Users/skminfotech/IdeaProjects/eventstracker`
 3. Wait for IntelliJ to index and download dependencies
 
 ---
 
 ### STEP 3: Run from IntelliJ
 
-**Option A: Using Run Configuration**
+1. Run → Edit Configurations → `EventServiceApplication`
+2. Set **Active profiles** to `local`
+3. Set **Working directory** to `$MODULE_WORKING_DIR$` (or the `eventstracker` folder)
+4. Leave environment variables empty unless you want to override `.env`
+5. Start Debug/Run
 
-1. Click the green ▶ button (top right)
-2. Select "EventTrackerApplication" (or similar)
-3. Wait for startup
-
-**Option B: Using Terminal in IntelliJ**
-
-1. Open: View → Tool Windows → Terminal
-2. Run:
-   ```bash
-   mvn spring-boot:run
-   ```
+Why this works: local profile now auto-loads `eventstracker/.env`, which is generated/synced from consolidated-postgres bootstrap.
 
 **Wait for message:**
 ```
-Started EventTrackerApplication in X seconds
+Started EventServiceApplication in X seconds
 ```
 
 **Access application:**
@@ -73,83 +67,80 @@ http://localhost:9081
 
 ## If It Still Fails
 
-### Check 1: Database Connection
+### Check 1: Containers are Running
 ```bash
-# In a new terminal, test PostgreSQL
 docker ps
-
-# Should show:
-# event-service-db
-# sathish-config-server
-# sathishproject-rabbitmq
 ```
 
-### Check 2: Environment File
-In IntelliJ:
-1. Run → Edit Configurations
-2. Select "EventTrackerApplication"
-3. Look for "Environment variables"
-4. Add or check these exist:
-   ```
-   SPRING_PROFILES_ACTIVE=local
-   CONFIG_SERVER_URL=http://localhost:8888
-   ```
+Should include:
+- `event-service-db`
+- `sathish-config-server`
+- `sathishproject-rabbitmq`
 
-### Check 3: View Application Logs
-In IntelliJ bottom panel:
-1. Look for "Run" tab
-2. Scroll to find error messages
-3. Search for: "PostgreSQL", "connection", "database"
-
-### Check 4: Verify Ports
+### Check 2: `.env` Exists and Has Credentials
 ```bash
-# Make sure infrastructure started correctly
-./eventtracker.sh status
+cd /Users/skminfotech/IdeaProjects/eventstracker
+ls -la .env
+grep -E '^(EVENTS_TRACKER_DB_URL|EVENTS_TRACKER_DB_USER|SPRING_CLOUD_CONFIG_USERNAME)=' .env
+```
 
-# Should show:
-# ✓ Port 6433 is in use (PostgreSQL)
-# ✓ Port 5672 is in use (RabbitMQ)
-# ✓ Port 8888 is in use (Config Server)
+If `.env` is missing, run:
+```bash
+./eventtracker.sh deps
+```
+
+### Check 3: Verify Ports
+```bash
+./eventtracker.sh status
+```
+
+Expected in-use ports:
+- `6433` (PostgreSQL)
+- `5672` (RabbitMQ)
+- `8888` (Config Server)
+
+### Check 4: Database Login from Container
+```bash
+docker exec event-service-db psql -U "$(grep '^EVENTS_TRACKER_DB_USER=' .env | cut -d= -f2-)" -d event-service -c 'select 1;'
 ```
 
 ---
 
 ## Common Errors & Fixes
 
-### Error: "Connection refused"
-```
-Cause: PostgreSQL not running
-Fix: Run: ./eventtracker.sh deps (keep it running)
-```
+### Error: `password authentication failed for user "postgres"`
+Cause: app or IDE still using stale `postgres` user while local stack uses generated `EVENTS_TRACKER_DB_USER`.
 
-### Error: "No bean named 'userDetailsService'"
-```
-Cause: Config server not running
-Fix: Check ./eventtracker.sh deps output - wait for "Config Server ready"
-```
+Fix:
+1. Re-run `./eventtracker.sh deps`
+2. Ensure IntelliJ run config working directory is `eventstracker`
+3. Remove hardcoded DB env vars from IntelliJ run config
 
-### Error: "Failed to configure a DataSource"
-```
-Cause: Missing environment variables
-Fix: In IntelliJ Run Configuration, add:
-     SPRING_PROFILES_ACTIVE=local
-```
+### Error: `Could not locate PropertySource` from Config Server
+Cause: Config server not running, or config credentials not loaded.
 
-### Error: "Address already in use"
-```
-Cause: Port 9081 already in use
-Fix: Kill process: ./eventtracker.sh stop
-     Or: Use different port in application.yml
-```
+Fix:
+1. Confirm `sathish-config-server` is running
+2. Confirm `.env` has `SPRING_CLOUD_CONFIG_USERNAME` and `SPRING_CLOUD_CONFIG_PASSWORD`
+3. Re-run `./eventtracker.sh deps`
+
+### Error: `Failed to configure a DataSource`
+Cause: local profile or `.env` was not loaded.
+
+Fix:
+1. Set run profile to `local`
+2. Ensure working directory points to `eventstracker` root
 
 ---
 
 ## Still Stuck?
 
 Run this diagnostic:
+
 ```bash
-cd eventstracker
+cd /Users/skminfotech/IdeaProjects/eventstracker
 ./eventtracker.sh check
+./eventtracker.sh status
 ```
 
-Share the output - it will show exactly what's missing.
+Then share the exact first failure stack trace block from IntelliJ Run/Debug output.

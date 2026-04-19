@@ -88,12 +88,50 @@ find_directory() {
     return 1
 }
 
+find_consolidated_root() {
+    local candidates=(
+        "../consolidated-postgres"
+        "../../consolidated-postgres"
+        "$HOME/IdeaProjects/consolidated-postgres"
+        "$HOME/Library/CloudStorage/GoogleDrive-satsmadison@gmail.com/Other computers/My Mac/consolidated-postgres"
+    )
+
+    for path in "${candidates[@]}"; do
+        if [ -d "$path" ] && [ -d "$path/scripts/local" ]; then
+            echo "$(cd "$path" && pwd)"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+sync_machine_local_envs() {
+    local consolidated_root
+    consolidated_root=$(find_consolidated_root || true)
+
+    if [ -z "$consolidated_root" ]; then
+        print_info "consolidated-postgres not found; skipping env bootstrap"
+        return 0
+    fi
+
+    local bootstrap_script="$consolidated_root/scripts/local/bootstrap-env.sh"
+    if [ ! -x "$bootstrap_script" ]; then
+        print_error "Expected executable bootstrap script: $bootstrap_script"
+        print_info "Run: chmod 755 '$bootstrap_script'"
+        return 1
+    fi
+
+    print_info "Syncing local env files from consolidated-postgres..."
+    "$bootstrap_script"
+}
+
 # ============================================================================
 # COMMAND: deps - Start only infrastructure (PostgreSQL, RabbitMQ, Config)
 # ============================================================================
 
 cleanup_stale_containers() {
-    local containers=("sathish-config-server" "event-service-db" "sathishproject-rabbitmq" "eventstracker-postgres")
+    local containers=("sathish-config-server" "sathishproject-rabbitmq" "eventstracker-postgres")
 
     for container in "${containers[@]}"; do
         if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -q "^${container}$"; then
@@ -106,8 +144,9 @@ cleanup_stale_containers() {
 }
 
 cmd_deps() {
-    validate_env
     print_header "Starting Infrastructure"
+
+    sync_machine_local_envs
 
     # Find directories
     CONFIG_DIR=$(find_directory "config-server" \
@@ -133,25 +172,47 @@ cmd_deps() {
     print_info "Checking for stale containers..."
     cleanup_stale_containers
 
-    # Start config server (uses config-server's own .env for GIT_URI, encrypt_key, etc.)
+    # Start config server (always recreate so credentials from .env are applied)
     print_info "Starting Config Server..."
     cd "$CONFIG_DIR"
-    docker-compose --env-file .env up -d config-server
+    docker-compose --env-file .env up -d --force-recreate config-server
 
-    # Wait for config server
-    for i in {1..30}; do
-        if curl -s http://localhost:8888/actuator/health > /dev/null 2>&1; then
-            print_status "Config Server ready"
+    # Read config-server auth values from its own .env
+    CONFIG_USER=$(grep -E '^username=' .env | tail -1 | cut -d'=' -f2-)
+    CONFIG_PASS=$(grep -E '^pass=' .env | tail -1 | cut -d'=' -f2-)
+    if [ -z "$CONFIG_USER" ] || [ -z "$CONFIG_PASS" ]; then
+        print_error "Config server username/pass missing in $CONFIG_DIR/.env"
+        return 1
+    fi
+
+    # Wait for config server endpoint to be reachable with auth
+    for i in {1..45}; do
+        if curl -sf -u "$CONFIG_USER:$CONFIG_PASS" "http://localhost:8888/eventstracker/local" > /dev/null 2>&1; then
+            print_status "Config Server ready and auth verified"
             break
+        fi
+        if [ "$i" -eq 45 ]; then
+            print_error "Config Server did not become ready with valid credentials"
+            print_info "Recent config-server logs:"
+            docker logs --tail 40 sathish-config-server 2>/dev/null || true
+            return 1
         fi
         echo -n "."
         sleep 1
     done
 
-    # Start infrastructure (uses config-server's .env for infra compose vars)
-    print_info "Starting PostgreSQL and RabbitMQ..."
+    # Start PostgreSQL via the consolidated local-db path.
+    print_info "Starting PostgreSQL (single source of truth: dev-up.sh)..."
+    cd "$SCRIPT_DIR"
+    ./dev-up.sh
+
+    # Start RabbitMQ with the infra env file (golden source for credentials).
+    print_info "Starting RabbitMQ..."
     cd "$INFRA_DIR"
-    docker-compose --env-file "$CONFIG_DIR/.env" up -d postgres sathishproject-rabbitmq
+    docker-compose --env-file "$INFRA_DIR/.env" up -d sathishproject-rabbitmq
+
+    cd "$SCRIPT_DIR"
+    validate_env
 
     sleep 3
     print_status "Infrastructure started"
@@ -166,49 +227,20 @@ cmd_deps() {
 # ============================================================================
 
 cmd_dev() {
-    local reset=${1:-false}
-
     print_header "Setting up Local Development Environment"
 
-    if ! docker ps > /dev/null 2>&1; then
-        print_error "Docker is not running"
-        return 1
-    fi
+    sync_machine_local_envs
 
-    # Clean up stale containers
-    print_info "Checking for stale containers..."
-    cleanup_stale_containers
-
-    if [ "$reset" = "--reset" ]; then
-        print_info "Resetting database..."
-        docker compose down -v 2>/dev/null || true
-    fi
-
-    print_info "Starting PostgreSQL..."
-    if docker container inspect "$CONTAINER_NAME" > /dev/null 2>&1 && \
-       docker ps --filter "name=$CONTAINER_NAME" | grep -q "$CONTAINER_NAME"; then
-        print_status "PostgreSQL already running on port $DB_PORT"
+    if [ "${1:-}" = "--reset" ]; then
+        print_info "Resetting EventTracker database via dev-up.sh..."
+        ./dev-up.sh --reset
     else
-        docker compose up -d
-        print_status "PostgreSQL started"
+        ./dev-up.sh
     fi
 
-    # Wait for PostgreSQL
-    print_info "Waiting for PostgreSQL..."
-    for i in {1..30}; do
-        if docker exec "$CONTAINER_NAME" pg_isready -U "$DB_USER" > /dev/null 2>&1; then
-            print_status "PostgreSQL ready"
-            break
-        fi
-        sleep 1
-    done
-
-    if [ ! -f ".env" ]; then
-        print_error ".env file not found — create a .env with the required variables"
-        return 1
-    fi
+    validate_env
     print_status "Development environment ready"
-    print_info "Run: mvn spring-boot:run"
+    print_info "Run: mvn spring-boot:run -Dspring-boot.run.profiles=local"
 }
 
 # ============================================================================
@@ -463,10 +495,10 @@ ${YELLOW}USAGE:${NC}
 ${YELLOW}COMMANDS:${NC}
     check       Validate all dependencies (run this first!)
 
-    dev         Start local dev environment (local DB, no config server)
+    dev         Start local dev environment (DB via dev-up.sh, no config server)
                 Options: --reset (drop and recreate database)
 
-    deps        Start only infrastructure (Config Server, PostgreSQL, RabbitMQ)
+    deps        Start only infrastructure (Config Server + DB/RabbitMQ from infra .env)
 
     start       Start full stack (config server + deps + app)
 
