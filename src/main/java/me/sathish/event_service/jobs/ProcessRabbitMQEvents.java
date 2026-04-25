@@ -10,9 +10,12 @@ import me.sathish.event_service.domain_event.DomainEventDTO;
 import me.sathish.event_service.domain_event.DomainEventMapper;
 import me.sathish.event_service.domain_event.DomainEventRepository;
 import me.sathish.event_service.util.ApplicationProperties;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.nio.charset.StandardCharsets;
 
 @Component
 @Slf4j
@@ -69,8 +72,9 @@ public class ProcessRabbitMQEvents {
 
     @Transactional
     @RabbitListener(queues = RabbitSchemaConfig.GARMIN_API_EVENTS_QUEUE)
-    public void processGarminEvents(String eventPayload) {
-       if (eventPayload == null) {
+    public void processGarminEvents(Message message) {
+        String eventPayload = message == null ? null : new String(message.getBody(), StandardCharsets.UTF_8);
+        if (eventPayload == null || eventPayload.isBlank()) {
             log.error("Received null payload from Garmin queue, skipping processing.");
             return;
         }
