@@ -22,6 +22,22 @@ print_status() { echo -e "${GREEN}✓${NC} $1"; }
 print_error()  { echo -e "${RED}✗${NC} $1"; }
 print_info()   { echo -e "${YELLOW}ℹ${NC} $1"; }
 
+run_psql_with_retry() {
+  local user="$1"
+  local db="$2"
+  local sql="$3"
+  local attempts="${4:-30}"
+  local i
+
+  for i in $(seq 1 "$attempts"); do
+    if docker exec "$CONTAINER_NAME" psql -U "$user" -d "$db" -c "$sql" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
 RESET_DB=false; CLOUD_MODE=false
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -149,7 +165,8 @@ fi
 print_info "Waiting for PostgreSQL on :$DB_PORT..."
 _ready=false
 for _i in $(seq 1 30); do
-  if docker exec "$CONTAINER_NAME" pg_isready -U "$EVENTS_TRACKER_DB_USER" >/dev/null 2>&1; then
+  # Use an actual SQL roundtrip (not just pg_isready) to avoid init-time flapping.
+  if run_psql_with_retry "$EVENTS_TRACKER_DB_USER" "postgres" "SELECT 1;" 1; then
     _ready=true; break
   fi
   sleep 1
@@ -168,18 +185,21 @@ _superuser=$(docker exec "$CONTAINER_NAME" printenv POSTGRES_USER 2>/dev/null ||
 print_info "Container superuser: '${_superuser}', desired DB user: '${EVENTS_TRACKER_DB_USER}'"
 
 # Idempotent: create role if missing, always sync password and grants
-docker exec "$CONTAINER_NAME" psql -U "$_superuser" -d postgres -c \
+run_psql_with_retry "$_superuser" "postgres" \
   "DO \$\$
    BEGIN
      CREATE ROLE \"${EVENTS_TRACKER_DB_USER}\" LOGIN PASSWORD '${EVENTS_TRACKER_DB_PASSWORD}';
    EXCEPTION WHEN duplicate_object THEN NULL;
-   END \$\$;" >/dev/null
-docker exec "$CONTAINER_NAME" psql -U "$_superuser" -d postgres -c \
-  "ALTER ROLE \"${EVENTS_TRACKER_DB_USER}\" WITH LOGIN PASSWORD '${EVENTS_TRACKER_DB_PASSWORD}';" >/dev/null
+   END \$\$;" 30 || { print_error "Failed to create/sync DB role ${EVENTS_TRACKER_DB_USER}"; exit 1; }
+run_psql_with_retry "$_superuser" "postgres" \
+  "ALTER ROLE \"${EVENTS_TRACKER_DB_USER}\" WITH LOGIN PASSWORD '${EVENTS_TRACKER_DB_PASSWORD}';" 30 || {
+  print_error "Failed to alter DB role ${EVENTS_TRACKER_DB_USER} password"
+  exit 1
+}
 print_status "DB role synced: ${EVENTS_TRACKER_DB_USER}"
 
-docker exec "$CONTAINER_NAME" psql -U "$_superuser" -d postgres -c \
-  "GRANT ALL PRIVILEGES ON DATABASE \"${DB_NAME}\" TO \"${EVENTS_TRACKER_DB_USER}\";" >/dev/null || true
+run_psql_with_retry "$_superuser" "postgres" \
+  "GRANT ALL PRIVILEGES ON DATABASE \"${DB_NAME}\" TO \"${EVENTS_TRACKER_DB_USER}\";" 30 || true
 
 # Write .env with local Docker values, preserving app-level secrets
 cat > .env << EOF
@@ -205,4 +225,3 @@ for _var in EVENT_DOMAIN_USER EVENT_DOMAIN_USER_PASSWORD SPRING_CLOUD_CONFIG_USE
 done
 print_status "eventstracker local environment ready"
 print_info "Run: mvn spring-boot:run -Dspring-boot.run.profiles=local"
-
