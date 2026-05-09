@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import me.sathish.event_service.config.EventserviceconfigSecurityConfig;
-import me.sathish.event_service.domain.Domain;
 import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.security.EventserviceconfigUserDetailsService;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,8 +47,7 @@ class DomainEventControllerIT {
     @Test
     @WithMockUser(authorities = "AUTH_USER")
     void authUser_canListDomainEvents() throws Exception {
-        mockMvc.perform(get("/domainEvents"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/domainEvents")).andExpect(status().isOk());
     }
 
     @Test
@@ -79,15 +77,13 @@ class DomainEventControllerIT {
     @Test
     @WithMockUser(authorities = "AUTH_USER")
     void authUser_cannotAccessEditPage() throws Exception {
-        mockMvc.perform(get("/domainEvents/edit/1100"))
-                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/domainEvents/edit/1100")).andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(authorities = "AUTH_USER")
     void authUser_cannotAccessAddPage() throws Exception {
-        mockMvc.perform(get("/domainEvents/add"))
-                .andExpect(status().isOk()); // add is not restricted beyond AUTH_USER
+        mockMvc.perform(get("/domainEvents/add")).andExpect(status().isOk()); // add is not restricted beyond AUTH_USER
     }
 
     @Test
@@ -95,8 +91,7 @@ class DomainEventControllerIT {
     void admin_canAccessEditPage() throws Exception {
         when(domainEventService.get(1100L)).thenReturn(sampleEvent());
 
-        mockMvc.perform(get("/domainEvents/edit/1100"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/domainEvents/edit/1100")).andExpect(status().isOk());
     }
 
     private DomainEventDTO sampleEvent() {

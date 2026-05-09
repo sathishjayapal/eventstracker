@@ -14,21 +14,21 @@
     <body>
         <header class="bg-light">
             <div class="container">
-                <nav class="navbar navbar-light navbar-expand-md">
-                    <a th:href="@{/}" class="navbar-brand">
-                        <img th:src="@{/images/events.png}" th:alt="#{app.title}" width="30" height="30" class="d-inline-block align-top" />
-                        <span class="ps-1">[[#{app.title}]]</span>
+                <nav class="navbar navbar-light navbar-expand-md py-2">
+                    <a th:href="@{/}" class="navbar-brand d-flex align-items-center py-1">
+                        <img th:src="@{/images/events.png}" th:alt="#{app.title}" width="30" height="30" class="d-inline-block" />
+                        <span class="ps-3">[[#{app.title}]]</span>
                     </a>
                     <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarToggle"
                             th:aria-label="#{navigation.toggle}" aria-controls="navbarToggle" aria-expanded="false">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarToggle">
-                        <ul class="navbar-nav ms-auto">
-                            <li class="navbar-item">
+                        <ul class="navbar-nav ms-auto align-items-center">
+                            <li class="nav-item">
                                 <a th:href="@{/}" class="nav-link">[[#{navigation.home}]]</a>
                             </li>
-                            <li class="navbar-item dropdown">
+                            <li class="nav-item dropdown">
                                 <button type="button" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" id="navbarEntitiesLink"
                                         aria-expanded="false">[[#{navigation.entities}]]</button>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarEntitiesLink">
@@ -36,9 +36,9 @@
                                     <li><a th:href="@{/domainEvents}" class="dropdown-item">[[#{domainEvent.list.headline}]]</a></li>
                                 </ul>
                             </li>
-                            <li class="navbar-item">
+                            <li class="nav-item">
                                 <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="nav-link">[[#{navigation.login}]]</a>
-                                <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="nav-link">
+                                <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="nav-link p-0 ms-2">
                                     <input th:value="#{navigation.logout}" type="submit" class="unset" />
                                 </form>
                             </li>

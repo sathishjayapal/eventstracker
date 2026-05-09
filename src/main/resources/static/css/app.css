@@ -1,3 +1,247 @@
+/* ── Runs-App Color Scheme ──────────────────────────────────── */
+:root {
+    --ra-blue-600: #2563EB;
+    --ra-blue-700: #1D4ED8;
+    --ra-blue-300: #93C5FD;
+    --ra-red-600: #DC2626;
+    --ra-red-700: #B91C1C;
+    --ra-red-300: #FCA5A5;
+    --ra-orange-600: #EA580C;
+    --ra-gray-50: #F9FAFB;
+    --ra-gray-100: #F3F4F6;
+    --ra-gray-200: #E5E7EB;
+    --ra-gray-300: #D1D5DB;
+    --ra-gray-500: #6B7280;
+    --ra-gray-700: #374151;
+    --ra-gray-900: #111827;
+
+    --bs-primary: var(--ra-blue-600);
+    --bs-primary-rgb: 37, 99, 235;
+    --bs-danger: var(--ra-red-600);
+    --bs-danger-rgb: 220, 38, 38;
+    --bs-body-color: var(--ra-gray-700);
+    --bs-link-color: var(--ra-blue-600);
+    --bs-link-hover-color: var(--ra-blue-700);
+}
+
 .unset {
     all: unset;
+}
+
+/* ── Header / Navbar ───────────────────────────────────────── */
+header.bg-light {
+    background-color: var(--ra-gray-50) !important;
+    border-bottom: 1px solid var(--ra-gray-200);
+}
+
+.navbar-brand span {
+    font-size: 1.25rem;
+    color: var(--ra-gray-900);
+}
+
+.navbar-light .navbar-nav .nav-link,
+.navbar-light .nav-link {
+    color: var(--ra-gray-500);
+}
+
+.navbar-light .navbar-nav .nav-link:hover,
+.navbar-light .nav-link:hover {
+    color: var(--ra-gray-700);
+}
+
+/* User badge style (matches runs-app user button) */
+.nav-user-badge {
+    background-color: var(--ra-gray-200);
+    color: var(--ra-gray-700);
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.nav-user-badge:hover {
+    background-color: var(--ra-gray-300);
+}
+
+/* ── Primary Buttons ───────────────────────────────────────── */
+.btn-primary {
+    background-color: var(--ra-blue-600);
+    border-color: var(--ra-blue-600);
+}
+
+.btn-primary:hover,
+.btn-primary:active {
+    background-color: var(--ra-blue-700);
+    border-color: var(--ra-blue-700);
+}
+
+.btn-primary:focus-visible {
+    box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.35);
+}
+
+/* ── Edit Buttons (blue, matching runs-app) ────────────────── */
+.btn-edit {
+    background-color: var(--ra-blue-600);
+    border-color: var(--ra-blue-600);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.btn-edit:hover,
+.btn-edit:active {
+    background-color: var(--ra-blue-700);
+    border-color: var(--ra-blue-700);
+    color: #fff;
+}
+
+.btn-edit:focus-visible {
+    box-shadow: 0 0 0 0.25rem var(--ra-blue-300);
+    color: #fff;
+}
+
+/* ── Delete Buttons (red, matching runs-app) ───────────────── */
+.btn-delete {
+    background-color: var(--ra-red-600);
+    border-color: var(--ra-red-600);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.btn-delete:hover,
+.btn-delete:active {
+    background-color: var(--ra-red-700);
+    border-color: var(--ra-red-700);
+    color: #fff;
+}
+
+.btn-delete:focus-visible {
+    box-shadow: 0 0 0 0.25rem var(--ra-red-300);
+    color: #fff;
+}
+
+/* ── Tables (bordered cells, gray header, subtle hover) ───── */
+.table-runs th {
+    background-color: var(--ra-gray-100);
+    border: 1px solid var(--ra-gray-300);
+    padding: 0.5rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--ra-gray-700);
+}
+
+.table-runs td {
+    border: 1px solid var(--ra-gray-300);
+    padding: 0.5rem 1rem;
+    vertical-align: middle;
+}
+
+.table-runs tbody tr:hover {
+    background-color: var(--ra-gray-50);
+}
+
+.table-runs {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Mono-spaced IDs */
+.table-runs .cell-id {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.875rem;
+}
+
+/* Colored value cells */
+.cell-blue {
+    color: var(--ra-blue-600);
+    font-weight: 600;
+}
+
+.cell-orange {
+    color: var(--ra-orange-600);
+    font-weight: 600;
+}
+
+/* ── Cards (flat, matching runs-app) ───────────────────────── */
+.card.card-runs {
+    border: 1px solid var(--ra-gray-200);
+    border-radius: 0.5rem;
+    box-shadow: none;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.card.card-runs:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+/* ── Links ─────────────────────────────────────────────────── */
+a.link-runs {
+    color: var(--ra-blue-600);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+a.link-runs:hover {
+    text-decoration: underline;
+}
+
+/* ── Headings ──────────────────────────────────────────────── */
+h1 {
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--ra-gray-900);
+}
+
+/* ── Alerts ────────────────────────────────────────────────── */
+.alert-success {
+    background-color: #dcfce7;
+    border-color: #86efac;
+    color: #166534;
+}
+
+.alert-info {
+    background-color: #dbeafe;
+    border-color: var(--ra-blue-300);
+    color: #1e40af;
+}
+
+.alert-danger {
+    background-color: #fee2e2;
+    border-color: var(--ra-red-300);
+    color: #991b1b;
+}
+
+/* ── Form Controls ─────────────────────────────────────────── */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--ra-blue-600);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+
+/* ── Pagination ────────────────────────────────────────────── */
+.page-link {
+    color: var(--ra-blue-600);
+}
+
+.page-item.active .page-link {
+    background-color: var(--ra-blue-600);
+    border-color: var(--ra-blue-600);
+}
+
+.page-link:hover {
+    color: var(--ra-blue-700);
+}
+
+/* ── Logout button inside nav ──────────────────────────────── */
+.nav-link .unset {
+    all: unset;
+    cursor: pointer;
+    color: var(--ra-red-600);
+    font-weight: 500;
+}
+
+.nav-link .unset:hover {
+    color: var(--ra-red-700);
 }

@@ -7,24 +7,12 @@ import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
 @ActiveProfiles("test")
-@TestPropertySource(
-        properties = {
-            "spring.datasource.url=jdbc:postgresql://localhost:5445/eventstracker_db",
-            "spring.datasource.username=postgres",
-            "spring.datasource.password=P4ssword!",
-            "spring.datasource.driver-class-name=org.postgresql.Driver",
-            "spring.rabbitmq.host=localhost",
-            "spring.rabbitmq.port=5672",
-            "spring.rabbitmq.username=guest",
-            "spring.rabbitmq.password=guest",
-            "eventDomainUser=user",
-            "eventDomainUserPassword=pass"
-        })
+@Import(ContainersConfig.class)
 class RabbitSchemaIT {
 
     @Autowired

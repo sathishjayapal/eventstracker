@@ -32,8 +32,7 @@ public class EventDomainUserDataLoader implements ApplicationRunner {
         String username = environment.getProperty("eventDomainUser");
         String password = environment.getProperty("eventDomainUserPassword");
         if (username == null || password == null) {
-            throw new IllegalStateException(
-                    "eventDomainUser and eventDomainUserPassword properties must not be null");
+            throw new IllegalStateException("eventDomainUser and eventDomainUserPassword properties must not be null");
         }
         createIfAbsent(username, password);
         createIfAbsent(username + "admin", password);

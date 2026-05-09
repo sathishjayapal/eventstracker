@@ -23,8 +23,7 @@ public class DomainEventDTO {
     @Size(max = 255)
     private String updatedBy;
 
-    @NotNull
-    private Long domain;
+    @NotNull private Long domain;
 
     private String domainName;
 

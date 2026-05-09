@@ -39,7 +39,8 @@ public class DomainDataLoader implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         final String configuredUser = environment.getProperty("eventDomainUser");
-        final String adminUser = environment.getProperty("eventTrackerAdminUser", configuredUser == null ? null : configuredUser + "admin");
+        final String adminUser = environment.getProperty(
+                "eventTrackerAdminUser", configuredUser == null ? null : configuredUser + "admin");
 
         if (adminUser == null || adminUser.isBlank()) {
             throw new IllegalStateException("Domain seeding aborted: 'eventTrackerAdminUser' must be configured.");
@@ -51,11 +52,14 @@ public class DomainDataLoader implements ApplicationRunner {
 
         final String runsName = requireNonBlank(environment.getProperty(RUNS_NAME_PROP, "RUNS_DOMAIN"), RUNS_NAME_PROP);
         final String runsStatus = environment.getProperty(RUNS_STATUS_PROP, "ACTIVE");
-        final String runsComments = environment.getProperty(RUNS_COMMENTS_PROP, "Seed domain for RUNS integration tests.");
+        final String runsComments =
+                environment.getProperty(RUNS_COMMENTS_PROP, "Seed domain for RUNS integration tests.");
 
-        final String githubName = requireNonBlank(environment.getProperty(GITHUB_NAME_PROP, "GITHUB_DOMAIN"), GITHUB_NAME_PROP);
+        final String githubName =
+                requireNonBlank(environment.getProperty(GITHUB_NAME_PROP, "GITHUB_DOMAIN"), GITHUB_NAME_PROP);
         final String githubStatus = environment.getProperty(GITHUB_STATUS_PROP, "ACTIVE");
-        final String githubComments = environment.getProperty(GITHUB_COMMENTS_PROP, "Seed domain for GitHub integration tests.");
+        final String githubComments =
+                environment.getProperty(GITHUB_COMMENTS_PROP, "Seed domain for GitHub integration tests.");
 
         seedDomainIfMissing(runsName, runsStatus, runsComments);
         seedDomainIfMissing(githubName, githubStatus, githubComments);
@@ -63,7 +67,8 @@ public class DomainDataLoader implements ApplicationRunner {
 
     private String requireNonBlank(String value, String propertyName) {
         if (!StringUtils.hasText(value)) {
-            throw new IllegalStateException("Domain seeding aborted: property '%s' must be set.".formatted(propertyName));
+            throw new IllegalStateException(
+                    "Domain seeding aborted: property '%s' must be set.".formatted(propertyName));
         }
         return value;
     }

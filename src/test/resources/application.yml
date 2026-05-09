@@ -2,15 +2,12 @@ eventDomainUser: user
 eventDomainUserPassword: pass
 
 server:
-  port: 0  # Use random port for tests
+  port: 0
 
-# Provide default values for common placeholders that might be missing
-local:
-  server:
-    port: ${server.port:0}
-
-# Test-specific configurations
 spring:
+  cloud:
+    config:
+      enabled: false
   test:
     database:
       replace: none
@@ -18,14 +15,9 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
-  datasource:
-    url: jdbc:postgresql://localhost:5445/eventstracker_db
-    driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: P4ssword!
   docker:
     compose:
-      enabled: false 
+      enabled: false
 
 garminrun-event:
   garmin-exchange: garminrun-testevent-exchange

@@ -44,7 +44,7 @@ jobs:
             exit 0
           fi
 
-          IMPORTANT_PATTERN='^(src/|pom\.xml$|docker-compose\.yml$|init\.sql$|eventtracker\.sh$|CONFIG_SERVER_SETUP\.md$|RUN_FROM_INTELLIJ\.md$|SETUP_GUIDE\.md$)'
+          IMPORTANT_PATTERN='^(src/|pom\.xml$|Dockerfile$|eventtracker\.sh$)'
           README_PATTERN='^(README\.md$|docs/README\.md$)'
 
           IMPORTANT_CHANGED="$(echo "${CHANGED_FILES}" | grep -E "${IMPORTANT_PATTERN}" || true)"

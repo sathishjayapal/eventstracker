@@ -2,8 +2,8 @@ package me.sathish.event_service.domain_event;
 
 import jakarta.validation.Valid;
 import me.sathish.event_service.domain.Domain;
-import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.domain.DomainInactiveException;
+import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.security.UserRoles;
 import me.sathish.event_service.util.CustomCollectors;
 import me.sathish.event_service.util.WebUtils;
@@ -51,22 +51,18 @@ public class DomainEventController {
             @RequestParam(required = false, defaultValue = "id") final String sortBy,
             @RequestParam(required = false, defaultValue = "DESC") final String sortDirection,
             final Model model) {
-        
+
         // Create custom pageable with user-selected options
         Pageable customPageable = org.springframework.data.domain.PageRequest.of(
-                pageable.getPageNumber(),
-                pageSize,
-                Sort.Direction.fromString(sortDirection),
-                sortBy
-        );
-        
+                pageable.getPageNumber(), pageSize, Sort.Direction.fromString(sortDirection), sortBy);
+
         Page<DomainEventDTO> page = domainEventService.findAllPaged(customPageable);
-        
+
         model.addAttribute("domainEvents", page);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDirection", sortDirection);
-        
+
         return "domainEvent/list";
     }
 

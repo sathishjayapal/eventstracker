@@ -1,21 +1,18 @@
 package me.sathish.event_service.jobs;
 
+import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import me.sathish.event_service.config.RabbitSchemaConfig;
 import me.sathish.event_service.domain.DomainConstants;
 import me.sathish.event_service.domain.DomainLookupService;
-import me.sathish.event_service.domain.DomainRepository;
 import me.sathish.event_service.domain_event.DomainEvent;
 import me.sathish.event_service.domain_event.DomainEventDTO;
 import me.sathish.event_service.domain_event.DomainEventMapper;
 import me.sathish.event_service.domain_event.DomainEventRepository;
-import me.sathish.event_service.util.ApplicationProperties;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.nio.charset.StandardCharsets;
 
 @Component
 @Slf4j
@@ -45,7 +42,8 @@ public class ProcessRabbitMQEvents {
         }
 
         log.info("=== Received GitHub event from RabbitMQ ===");
-        log.info("Received domain event: ID={}, Type={}, EventId={}",
+        log.info(
+                "Received domain event: ID={}, Type={}, EventId={}",
                 domainEventDTO.getId(),
                 domainEventDTO.getEventType(),
                 domainEventDTO.getEventId());
@@ -57,10 +55,7 @@ public class ProcessRabbitMQEvents {
                     domainEventDTO.getEventId(),
                     savedEvent.getId());
         } catch (RuntimeException ex) {
-            log.error(
-                    "Failed to persist domain event payload for EventId={}",
-                    domainEventDTO.getEventId(),
-                    ex);
+            log.error("Failed to persist domain event payload for EventId={}", domainEventDTO.getEventId(), ex);
             return;
         }
 
@@ -100,10 +95,7 @@ public class ProcessRabbitMQEvents {
             // Process the Garmin event
             processGarminRunEventFromString(eventPayload);
         } catch (RuntimeException ex) {
-            log.error(
-                    "Failed to persist Garmin event payload: {}",
-                    eventPayload,
-                    ex);
+            log.error("Failed to persist Garmin event payload: {}", eventPayload, ex);
         }
     }
 
@@ -125,8 +117,7 @@ public class ProcessRabbitMQEvents {
     }
 
     private DomainEvent saveIncomingEvent(DomainEventDTO domainEventDTO) {
-        final DomainEvent domainEvent =
-                domainEventMapper.updateDomainEvent(domainEventDTO, new DomainEvent());
+        final DomainEvent domainEvent = domainEventMapper.updateDomainEvent(domainEventDTO, new DomainEvent());
         return domainEventRepository.save(domainEvent);
     }
 
@@ -137,7 +128,9 @@ public class ProcessRabbitMQEvents {
         domainEventDTO.setEventId(java.util.UUID.randomUUID().toString());
         domainEventDTO.setCreatedBy("GARMIN_SERVICE");
         domainEventDTO.setUpdatedBy("GARMIN_SERVICE");
-        domainEventDTO.setDomain(domainLookupService.ensureActiveDomain(DomainConstants.RUNS_DOMAIN).getId());
+        domainEventDTO.setDomain(domainLookupService
+                .ensureActiveDomain(DomainConstants.RUNS_DOMAIN)
+                .getId());
         return domainEventDTO;
     }
 }

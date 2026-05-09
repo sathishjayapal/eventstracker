@@ -42,7 +42,7 @@ public class DomainResourceTest extends BaseIT {
     @Test
     void getAllDomains_unauthorized() {
         ResponseEntity<String> response = restTemplate.getForEntity("/api/domains", String.class);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
     @Test

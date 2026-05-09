@@ -52,7 +52,8 @@ public class RabbitSchemaConfig {
                 .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
                 .withArgument("x-message-ttl", MESSAGE_TTL_MS)
                 .build();
-        Queue dlqSatProjectsEventsQueue = QueueBuilder.durable(DLQ_SAT_PROJECTS_EVENTS_QUEUE).build();
+        Queue dlqSatProjectsEventsQueue =
+                QueueBuilder.durable(DLQ_SAT_PROJECTS_EVENTS_QUEUE).build();
 
         // GitHub domain queues
         Queue gitHubApiEventsQueue = QueueBuilder.durable(GITHUB_API_EVENTS_QUEUE)
@@ -65,8 +66,10 @@ public class RabbitSchemaConfig {
                 .withArgument("x-message-ttl", MESSAGE_TTL_MS)
                 .withArgument("x-dead-letter-routing-key", GITHUB_OPS_ROUTING_KEY)
                 .build();
-        Queue dlqGitHubApiEventsQueue = QueueBuilder.durable(DLQ_GITHUB_API_EVENTS_QUEUE).build();
-        Queue dlqGitHubOpsEventsQueue = QueueBuilder.durable(DLQ_GITHUB_OPS_EVENTS_QUEUE).build();
+        Queue dlqGitHubApiEventsQueue =
+                QueueBuilder.durable(DLQ_GITHUB_API_EVENTS_QUEUE).build();
+        Queue dlqGitHubOpsEventsQueue =
+                QueueBuilder.durable(DLQ_GITHUB_OPS_EVENTS_QUEUE).build();
 
         // Garmin domain queues
         Queue garminApiEventsQueue = QueueBuilder.durable(GARMIN_API_EVENTS_QUEUE)
@@ -79,8 +82,10 @@ public class RabbitSchemaConfig {
                 .withArgument("x-message-ttl", MESSAGE_TTL_MS)
                 .withArgument("x-dead-letter-routing-key", GARMIN_OPS_ROUTING_KEY)
                 .build();
-        Queue dlqGarminApiEventsQueue = QueueBuilder.durable(DLQ_GARMIN_API_EVENTS_QUEUE).build();
-        Queue dlqGarminOpsEventsQueue = QueueBuilder.durable(DLQ_GARMIN_OPS_EVENTS_QUEUE).build();
+        Queue dlqGarminApiEventsQueue =
+                QueueBuilder.durable(DLQ_GARMIN_API_EVENTS_QUEUE).build();
+        Queue dlqGarminOpsEventsQueue =
+                QueueBuilder.durable(DLQ_GARMIN_OPS_EVENTS_QUEUE).build();
 
         return new Declarables(
                 // Exchanges
@@ -108,16 +113,32 @@ public class RabbitSchemaConfig {
                 BindingBuilder.bind(dlqSatProjectsEventsQueue).to(dlxExchange).with("#"),
 
                 // Bindings: GitHub exchange → topic queues
-                BindingBuilder.bind(gitHubApiEventsQueue).to(gitHubEventsExchange).with(GITHUB_API_ROUTING_KEY),
-                BindingBuilder.bind(gitHubOpsEventsQueue).to(gitHubEventsExchange).with(GITHUB_OPS_ROUTING_KEY),
-                BindingBuilder.bind(dlqGitHubApiEventsQueue).to(gitHubEventsDlxExchange).with(GITHUB_API_ROUTING_KEY),
-                BindingBuilder.bind(dlqGitHubOpsEventsQueue).to(gitHubEventsDlxExchange).with(GITHUB_OPS_ROUTING_KEY),
+                BindingBuilder.bind(gitHubApiEventsQueue)
+                        .to(gitHubEventsExchange)
+                        .with(GITHUB_API_ROUTING_KEY),
+                BindingBuilder.bind(gitHubOpsEventsQueue)
+                        .to(gitHubEventsExchange)
+                        .with(GITHUB_OPS_ROUTING_KEY),
+                BindingBuilder.bind(dlqGitHubApiEventsQueue)
+                        .to(gitHubEventsDlxExchange)
+                        .with(GITHUB_API_ROUTING_KEY),
+                BindingBuilder.bind(dlqGitHubOpsEventsQueue)
+                        .to(gitHubEventsDlxExchange)
+                        .with(GITHUB_OPS_ROUTING_KEY),
 
                 // Bindings: Garmin exchange → topic queues
-                BindingBuilder.bind(garminApiEventsQueue).to(garminEventsExchange).with(GARMIN_API_ROUTING_KEY),
-                BindingBuilder.bind(garminOpsEventsQueue).to(garminEventsExchange).with(GARMIN_OPS_ROUTING_KEY),
-                BindingBuilder.bind(dlqGarminApiEventsQueue).to(garminEventsDlxExchange).with(GARMIN_API_ROUTING_KEY),
-                BindingBuilder.bind(dlqGarminOpsEventsQueue).to(garminEventsDlxExchange).with(GARMIN_OPS_ROUTING_KEY),
+                BindingBuilder.bind(garminApiEventsQueue)
+                        .to(garminEventsExchange)
+                        .with(GARMIN_API_ROUTING_KEY),
+                BindingBuilder.bind(garminOpsEventsQueue)
+                        .to(garminEventsExchange)
+                        .with(GARMIN_OPS_ROUTING_KEY),
+                BindingBuilder.bind(dlqGarminApiEventsQueue)
+                        .to(garminEventsDlxExchange)
+                        .with(GARMIN_API_ROUTING_KEY),
+                BindingBuilder.bind(dlqGarminOpsEventsQueue)
+                        .to(garminEventsDlxExchange)
+                        .with(GARMIN_OPS_ROUTING_KEY),
 
                 // Exchange-to-exchange bindings: domain exchanges → fanout
                 BindingBuilder.bind(gitHubEventsExchange).to(fanoutExchange),

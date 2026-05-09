@@ -1,0 +1,10 @@
+.git
+.idea
+.vscode
+.DS_Store
+target
+*.log
+.env
+.env.*
+!.env.template
+node_modules

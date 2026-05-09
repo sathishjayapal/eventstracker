@@ -135,6 +135,7 @@
             <groupId>com.github.gavlyukovskiy</groupId>
             <artifactId>p6spy-spring-boot-starter</artifactId>
             <version>1.12.0</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.javacrumbs.shedlock</groupId>
@@ -184,16 +185,16 @@
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>${spotless.version}</version>
-<!--                <configuration>-->
-<!--                    <java>-->
-<!--                        <palantirJavaFormat>-->
-<!--                            <version>2.38.0</version>-->
-<!--                        </palantirJavaFormat>-->
-<!--                        <importOrder />-->
-<!--                        <removeUnusedImports />-->
-<!--                        <formatAnnotations />-->
-<!--                    </java>-->
-<!--                </configuration>-->
+                <configuration>
+                    <java>
+                        <palantirJavaFormat>
+                            <version>2.38.0</version>
+                        </palantirJavaFormat>
+                        <importOrder />
+                        <removeUnusedImports />
+                        <formatAnnotations />
+                    </java>
+                </configuration>
                 <executions>
                     <execution>
                         <phase>validate</phase>
@@ -217,9 +218,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <profiles>
-                        <profile>local</profile>
-                    </profiles>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

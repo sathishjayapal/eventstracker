@@ -45,8 +45,8 @@ public class LoginDebugTest extends BaseIT {
         ResponseEntity<String> unauthResponse = restTemplate.getForEntity("/api/domains", String.class);
         System.out.println("Unauth API response status: " + unauthResponse.getStatusCode());
 
-        if (unauthResponse.getStatusCode() == HttpStatus.FORBIDDEN) {
-            System.out.println(" API endpoint properly protected (403 Forbidden)");
+        if (unauthResponse.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+            System.out.println(" API endpoint properly protected (401 Unauthorized)");
         } else {
             System.out.println(" API endpoint security issue: " + unauthResponse.getStatusCode());
         }

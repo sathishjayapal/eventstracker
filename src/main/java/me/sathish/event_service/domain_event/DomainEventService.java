@@ -3,7 +3,6 @@ package me.sathish.event_service.domain_event;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import me.sathish.event_service.domain.Domain;
-import me.sathish.event_service.domain.DomainConstants;
 import me.sathish.event_service.domain.DomainLookupService;
 import me.sathish.event_service.util.ApplicationProperties;
 import me.sathish.event_service.util.NotFoundException;
@@ -42,25 +41,20 @@ public class DomainEventService {
                 domainEventRepository.findAll(page).getContent();
         //        final List<DomainEvent> domainEvents = domainEventRepository.findAll(Sort.by("id"));
 
-        return domainEvents.stream()
-                .map(this::toDto)
-                .toList();
+        return domainEvents.stream().map(this::toDto).toList();
     }
 
     public org.springframework.data.domain.Page<DomainEventDTO> findAllPaged(Pageable pageable) {
-        return domainEventRepository.findAll(pageable)
-                .map(this::toDto);
+        return domainEventRepository.findAll(pageable).map(this::toDto);
     }
 
     public DomainEventDTO get(final Long id) {
-        return domainEventRepository
-                .findById(id)
-                .map(this::toDto)
-                .orElseThrow(NotFoundException::new);
+        return domainEventRepository.findById(id).map(this::toDto).orElseThrow(NotFoundException::new);
     }
 
     public Long create(final DomainEventDTO domainEventDTO) throws Exception {
-        final String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        final String currentUser =
+                SecurityContextHolder.getContext().getAuthentication().getName();
         domainEventDTO.setCreatedBy(currentUser);
         domainEventDTO.setUpdatedBy(currentUser);
         final DomainEvent domainEvent = new DomainEvent();
@@ -74,7 +68,8 @@ public class DomainEventService {
     }
 
     public void update(final Long id, final DomainEventDTO domainEventDTO) {
-        final String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        final String currentUser =
+                SecurityContextHolder.getContext().getAuthentication().getName();
         domainEventDTO.setUpdatedBy(currentUser);
         final DomainEvent domainEvent = domainEventRepository.findById(id).orElseThrow(NotFoundException::new);
         domainEventDTO.setCreatedBy(domainEvent.getCreatedBy());

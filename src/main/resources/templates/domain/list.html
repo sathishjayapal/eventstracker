@@ -14,25 +14,28 @@
             </div>
             <div th:if="${domains.empty}">[[#{domain.list.empty}]]</div>
             <div th:if="${!domains.empty}" class="table-responsive">
-                <table class="table table-striped table-hover align-middle">
+                <table class="table-runs">
                     <thead>
                         <tr>
-                            <th scope="col">[[#{domain.id.label}]]</th>
-                            <th scope="col">[[#{domain.domainName.label}]]<!-- --></th>
-                            <th scope="col">[[#{domain.status.label}]]<!-- --></th>
+                            <th>[[#{domain.id.label}]]</th>
+                            <th>[[#{domain.domainName.label}]]</th>
+                            <th>[[#{domain.status.label}]]</th>
+                            <th><!-- --></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="domain : ${domains}">
-                            <td>[[${domain.id}]]</td>
-                            <td>[[${domain.domainName}]]</td>
-                            <td>[[${domain.status}]]</td>
+                            <td class="cell-id">[[${domain.id}]]</td>
+                            <td>
+                                <a th:href="@{/domains/edit/{id}(id=${domain.id})}" class="link-runs">[[${domain.domainName}]]</a>
+                            </td>
+                            <td class="cell-blue">[[${domain.status}]]</td>
                             <td>
                                 <div class="float-end text-nowrap">
-                                    <a th:href="@{/domains/edit/{id}(id=${domain.id})}" class="btn btn-sm btn-secondary">[[#{domain.list.edit}]]</a>
+                                    <a th:href="@{/domains/edit/{id}(id=${domain.id})}" class="btn btn-sm btn-edit">[[#{domain.list.edit}]]</a>
                                     <form th:action="@{/domains/delete/{id}(id=${domain.id})}"
                                             th:data-confirm-message="#{delete.confirm}" method="post" class="js-submit-confirm d-inline">
-                                        <button type="submit" class="btn btn-sm btn-secondary">[[#{domain.list.delete}]]</button>
+                                        <button type="submit" class="btn btn-sm btn-delete">[[#{domain.list.delete}]]</button>
                                     </form>
                                 </div>
                             </td>

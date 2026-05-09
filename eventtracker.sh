@@ -395,7 +395,6 @@ EOF
 cmd_stop() {
     print_header "Stopping Containers"
 
-    docker compose down 2>/dev/null && print_status "Local containers stopped" || true
     docker stop sathish-config-server 2>/dev/null && print_status "Config server stopped" || true
     docker stop event-service-db 2>/dev/null && print_status "PostgreSQL stopped" || true
     docker stop sathishproject-rabbitmq 2>/dev/null && print_status "RabbitMQ stopped" || true
@@ -467,13 +466,6 @@ cmd_check() {
         print_status "pom.xml found"
     else
         print_error "pom.xml not found"
-        missing=$((missing + 1))
-    fi
-
-    if [ -f "docker-compose.yml" ]; then
-        print_status "docker-compose.yml found"
-    else
-        print_error "docker-compose.yml not found"
         missing=$((missing + 1))
     fi
 
