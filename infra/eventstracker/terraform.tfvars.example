@@ -1,0 +1,44 @@
+# Copy to terraform.tfvars (git-ignored) and fill in all values.
+
+aws_region  = "us-east-1"
+environment = "prod"
+app_name    = "eventstracker"
+
+vpc_name_tag             = "my-vpc"
+private_subnet_tag_key   = "Tier"
+private_subnet_tag_value = "Private"
+public_subnet_tag_key    = "Tier"
+public_subnet_tag_value  = "Public"
+
+db_name              = "eventstracker_db"
+db_username          = "eventstracker"
+db_password          = "CHANGE_ME_strong_password"
+db_instance_class    = "db.t3.micro"
+db_allocated_storage = 20
+
+config_server_git_uri      = "https://github.com/your-org/your-config-repo"
+config_server_git_username = "your-github-username"
+config_server_git_password = "ghp_CHANGE_ME"
+config_server_encrypt_key  = "CHANGE_ME_32_char_key"
+config_server_username     = "configuser"
+config_server_password     = "CHANGE_ME_config_password"
+
+event_domain_user          = "admin"
+event_domain_user_password = "CHANGE_ME_app_password"
+
+rabbitmq_username = "admin"
+rabbitmq_password = "CHANGE_ME_rabbitmq_password"
+
+eventstracker_image_tag = "latest"
+config_server_image_tag = "latest"
+rabbitmq_image          = "rabbitmq:3-management-alpine"
+
+eventstracker_cpu           = 1024
+eventstracker_memory        = 2048
+eventstracker_desired_count = 2
+config_server_cpu           = 512
+config_server_memory        = 1024
+rabbitmq_cpu                = 512
+rabbitmq_memory             = 1024
+
+certificate_arn = ""

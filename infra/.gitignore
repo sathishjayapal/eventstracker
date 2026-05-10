@@ -1,0 +1,11 @@
+# Terraform state and local overrides
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.backup
+**/.terraform.lock.hcl
+**/backend.hcl
+**/terraform.tfvars
+**/*.tfvars.local
+
+# Secrets — never commit
+**/.env
