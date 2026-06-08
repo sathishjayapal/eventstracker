@@ -1,7 +1,7 @@
 spring:
   cloud:
     config:
-      uri: http://192.168.4.30:8888
+      uri: ${CONFIG_SERVER_URL}
       username: ${SPRING_CLOUD_CONFIG_USERNAME}
       password: ${SPRING_CLOUD_CONFIG_PASSWORD}
       fail-fast: false
