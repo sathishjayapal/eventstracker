@@ -4,6 +4,51 @@
         layout:decorate="~{layout}">
     <head>
         <title>[[#{domainEvent.list.headline}]]</title>
+        <style>
+            .events-table {
+                width: 100%;
+                table-layout: fixed;
+            }
+
+            .events-table .cell-id {
+                width: 72px;
+            }
+
+            .events-table .cell-event-type {
+                width: 130px;
+            }
+
+            .events-table .cell-domain {
+                width: 160px;
+            }
+
+            .events-table .cell-date {
+                width: 150px;
+            }
+
+            .events-table .cell-actions {
+                width: 150px;
+            }
+
+            .events-table .cell-payload {
+                min-width: 0;
+            }
+
+            .events-table .payload-content {
+                max-width: 100%;
+                max-height: 14rem;
+                overflow: auto;
+                white-space: pre-wrap;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+                font-size: 0.82rem;
+                line-height: 1.35;
+                background: rgba(0, 0, 0, 0.04);
+                border-radius: 0.375rem;
+                padding: 0.5rem;
+            }
+        </style>
     </head>
     <body>
         <div layout:fragment="content">
@@ -63,31 +108,33 @@
 
             <div th:if="${domainEvents.empty}">[[#{domainEvent.list.empty}]]</div>
             <div th:if="${!domainEvents.empty}" class="table-responsive">
-                <table class="table-runs">
+                <table class="table-runs events-table">
                     <thead>
                         <tr>
-                            <th>[[#{domainEvent.id.label}]]</th>
-                            <th>[[#{domainEvent.eventType.label}]]</th>
+                            <th class="cell-id">[[#{domainEvent.id.label}]]</th>
+                            <th class="cell-event-type">[[#{domainEvent.eventType.label}]]</th>
                             <th>[[#{domainEvent.payload.label}]]</th>
-                            <th>[[#{domainEvent.domain.label}]]</th>
-                            <th>Date Created</th>
-                            <th sec:authorize="hasAuthority('ADMIN')"><!-- --></th>
+                            <th class="cell-domain">[[#{domainEvent.domain.label}]]</th>
+                            <th class="cell-date">Date Created</th>
+                            <th class="cell-actions" sec:authorize="hasAuthority('ADMIN')"><!-- --></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="domainEvent : ${domainEvents}">
                             <td class="cell-id">[[${domainEvent.id}]]</td>
-                            <td class="cell-blue">[[${domainEvent.eventType}]]</td>
-                            <td>[[${domainEvent.payload}]]</td>
-                            <td>
+                            <td class="cell-blue cell-event-type">[[${domainEvent.eventType}]]</td>
+                            <td class="cell-payload">
+                                <div class="payload-content" th:text="${domainEvent.payload}"></div>
+                            </td>
+                            <td class="cell-domain">
                                 <span th:if="${domainEvent.domainName != null}" class="cell-blue" th:text="${domainEvent.domainName}"></span>
                                 <span th:if="${domainEvent.domainName == null}" class="text-muted">N/A</span>
                             </td>
-                            <td>
+                            <td class="cell-date">
                                 <span th:if="${domainEvent.dateCreated != null}" th:text="${domainEvent.dateCreated}"></span>
                                 <span th:if="${domainEvent.dateCreated == null}" class="text-muted">N/A</span>
                             </td>
-                            <td sec:authorize="hasAuthority('ADMIN')">
+                            <td class="cell-actions" sec:authorize="hasAuthority('ADMIN')">
                                 <div class="float-end text-nowrap">
                                     <a th:href="@{/domainEvents/edit/{id}(id=${domainEvent.id})}" class="btn btn-sm btn-edit">[[#{domainEvent.list.edit}]]</a>
                                     <form th:action="@{/domainEvents/delete/{id}(id=${domainEvent.id})}"
