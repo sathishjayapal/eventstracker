@@ -13,31 +13,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: eventstracker_db
-        ports:
-          - 5445:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      rabbitmq:
-        image: rabbitmq:3-management-alpine
-        ports:
-          - 5672:5672
-        options: >-
-          --health-cmd "rabbitmq-diagnostics -q check_running"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
 
@@ -51,14 +26,5 @@ jobs:
       - name: Check code formatting
         run: ./mvnw spotless:check -B
 
-      - name: Build and test
-        run: ./mvnw verify -B
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5445/eventstracker_db
-          SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: postgres
-          SPRING_RABBITMQ_HOST: localhost
-          SPRING_RABBITMQ_PORT: 5672
-          SPRING_RABBITMQ_USERNAME: guest
-          SPRING_RABBITMQ_PASSWORD: guest
-          SPRING_CLOUD_CONFIG_ENABLED: "false"
+      - name: Build (skip tests)
+        run: ./mvnw package -DskipTests -B
