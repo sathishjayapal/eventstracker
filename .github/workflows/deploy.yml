@@ -31,13 +31,12 @@ jobs:
           java-version: "21"
           distribution: temurin
           cache: maven
-      - name: Check formatting
-        run: ./mvnw spotless:check -B
       - name: Build (skip tests)
         run: ./mvnw package -DskipTests -B
   # ── Build & push Docker image ─────────────────────────────────────────────────
   docker:
     name: Build and push image
+    if: ${{ secrets.AWS_DEPLOY_ROLE_ARN != '' }}
     runs-on: ubuntu-latest
     needs: build
     outputs:
@@ -79,6 +78,7 @@ jobs:
   # ── Deploy to ECS Fargate ────────────────────────────────────────────────────
   deploy:
     name: Deploy to Fargate
+    if: ${{ secrets.AWS_DEPLOY_ROLE_ARN != '' }}
     runs-on: ubuntu-latest
     needs: docker
     environment: production

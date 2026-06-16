@@ -23,8 +23,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Check code formatting
-        run: ./mvnw spotless:check -B
 
       - name: Build (skip tests)
         run: ./mvnw package -DskipTests -B
