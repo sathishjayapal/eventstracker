@@ -35,15 +35,28 @@ jobs:
         run: ./mvnw package -DskipTests -B
   # ── Build & push Docker image ─────────────────────────────────────────────────
   docker:
-    name: Build and push image
-    if: ${{ secrets.AWS_DEPLOY_ROLE_ARN != '' }}
+    name: Build and publish image
     runs-on: ubuntu-latest
     needs: build
     outputs:
+      publish_mode: ${{ steps.mode.outputs.publish_mode }}
       image_tag: ${{ steps.meta.outputs.image_tag }}
-      image_uri: ${{ steps.meta.outputs.image_uri }}
+      image_uri: ${{ steps.out_uri.outputs.image_uri }}
     steps:
       - uses: actions/checkout@v4
+      - name: Resolve publish mode
+        id: mode
+        run: |
+          if [ -n "${{ secrets.AWS_DEPLOY_ROLE_ARN }}" ]; then
+            echo "publish_mode=acg" >> "$GITHUB_OUTPUT"
+            echo "ACG/AWS deployment credentials detected." >> "$GITHUB_STEP_SUMMARY"
+          elif [ -n "${{ secrets.DOCKERHUB_USERNAME }}" ] && [ -n "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+            echo "publish_mode=dockerhub" >> "$GITHUB_OUTPUT"
+            echo "ACG credentials missing; Docker Hub fallback enabled." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "publish_mode=build_only" >> "$GITHUB_OUTPUT"
+            echo "ACG and Docker Hub credentials are missing; performing build-only success path." >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Resolve image tag
         id: meta
         run: |
@@ -52,16 +65,22 @@ jobs:
             TAG="${{ github.sha }}"
           fi
           echo "image_tag=${TAG}" >> "$GITHUB_OUTPUT"
+      - name: Resolve Docker Hub image
+        id: dockerhub
+        run: |
+          echo "image=${{ secrets.DOCKERHUB_USERNAME }}/eventstracker" >> "$GITHUB_OUTPUT"
       - name: Configure AWS credentials via OIDC
+        if: ${{ steps.mode.outputs.publish_mode == 'acg' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Log in to ECR
+        if: ${{ steps.mode.outputs.publish_mode == 'acg' }}
         id: ecr_login
         uses: aws-actions/amazon-ecr-login@v2
-      - name: Build and push
-        id: build
+      - name: Build and push to ECR (ACG path)
+        if: ${{ steps.mode.outputs.publish_mode == 'acg' }}
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -71,14 +90,35 @@ jobs:
             ${{ steps.ecr_login.outputs.registry }}/${{ env.ECR_REPO_APP }}:latest
           cache-from: type=registry,ref=${{ steps.ecr_login.outputs.registry }}/${{ env.ECR_REPO_APP }}:latest
           cache-to: type=inline
-      - name: Set image URI output
-        id: uri
+      - name: Log in to Docker Hub (fallback path)
+        if: ${{ steps.mode.outputs.publish_mode == 'dockerhub' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push to Docker Hub (fallback path)
+        if: ${{ steps.mode.outputs.publish_mode == 'dockerhub' }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.dockerhub.outputs.image }}:${{ steps.meta.outputs.image_tag }}
+            ${{ steps.dockerhub.outputs.image }}:latest
+      - name: Set published image URI output
+        id: out_uri
         run: |
-          echo "image_uri=${{ steps.ecr_login.outputs.registry }}/${{ env.ECR_REPO_APP }}:${{ steps.meta.outputs.image_tag }}" >> "$GITHUB_OUTPUT"
+          if [ "${{ steps.mode.outputs.publish_mode }}" = "acg" ]; then
+            echo "image_uri=${{ steps.ecr_login.outputs.registry }}/${{ env.ECR_REPO_APP }}:${{ steps.meta.outputs.image_tag }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ steps.mode.outputs.publish_mode }}" = "dockerhub" ]; then
+            echo "image_uri=${{ steps.dockerhub.outputs.image }}:${{ steps.meta.outputs.image_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "image_uri=eventstracker:${{ steps.meta.outputs.image_tag }}" >> "$GITHUB_OUTPUT"
+          fi
   # ── Deploy to ECS Fargate ────────────────────────────────────────────────────
   deploy:
-    name: Deploy to Fargate
-    if: ${{ secrets.AWS_DEPLOY_ROLE_ARN != '' }}
+    name: Deploy to Fargate (ACG path)
+    if: ${{ needs.docker.outputs.publish_mode == 'acg' }}
     runs-on: ubuntu-latest
     needs: docker
     environment: production
@@ -109,3 +149,47 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
           # Circuit breaker in the ECS service will auto-rollback on failure
+
+  publish-summary:
+    name: Publish summary
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [ docker, deploy ]
+    steps:
+      - name: Write summary
+        run: |
+          echo "## Publish Result" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Mode: ${{ needs.docker.outputs.publish_mode }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Image: ${{ needs.docker.outputs.image_uri }}" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ needs.docker.outputs.publish_mode }}" = "acg" ]; then
+            echo "- Deploy target: ACG sandbox (ECS/Fargate)" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Deploy job result: ${{ needs.deploy.result }}" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ needs.docker.outputs.publish_mode }}" = "dockerhub" ]; then
+            echo "- Deploy target: Docker Hub fallback (no ACG credentials found)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- Deploy target: none (build-only path, credentials missing)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  notify-on-failure:
+    name: Notify on failure
+    if: failure()
+    runs-on: ubuntu-latest
+    needs: [ build, docker, deploy, publish-summary ]
+    steps:
+      - name: Send failure email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "[eventstracker] GitHub Actions failed - ${{ github.workflow }}"
+          to: ${{ secrets.ALERT_EMAIL_TO }}
+          from: ${{ secrets.ALERT_EMAIL_FROM }}
+          body: |
+            Workflow: ${{ github.workflow }}
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Run URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
