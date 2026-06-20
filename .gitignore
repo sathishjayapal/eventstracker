@@ -10,6 +10,7 @@ application-local.yml
 
 ## IntelliJ IDEA
 .env
+.env_mac_connected
 .idea
 *.iws
 *.iml
