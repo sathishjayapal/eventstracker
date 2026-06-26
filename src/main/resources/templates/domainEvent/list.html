@@ -8,14 +8,38 @@
             .events-table {
                 width: 100%;
                 table-layout: fixed;
+                border-collapse: separate;
+                border-spacing: 0;
+            }
+
+            .events-table thead th {
+                background: #f8f9fa;
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                letter-spacing: 0.03em;
+                padding: 0.75rem;
+                border-bottom: 2px solid #dee2e6;
+            }
+
+            .events-table tbody td {
+                padding: 0.75rem;
+                vertical-align: top;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .events-table tbody tr:hover {
+                background: #f8f9fa;
             }
 
             .events-table .cell-id {
                 width: 72px;
+                font-variant-numeric: tabular-nums;
+                color: #6c757d;
             }
 
             .events-table .cell-event-type {
-                width: 130px;
+                width: 170px;
             }
 
             .events-table .cell-domain {
@@ -23,7 +47,7 @@
             }
 
             .events-table .cell-date {
-                width: 150px;
+                width: 160px;
             }
 
             .events-table .cell-actions {
@@ -34,19 +58,85 @@
                 min-width: 0;
             }
 
-            .events-table .payload-content {
+            .event-type-badge {
+                display: inline-block;
+                font-size: 0.75rem;
+                font-weight: 600;
+                padding: 0.35em 0.65em;
+                border-radius: 9999px;
+                text-transform: uppercase;
+                letter-spacing: 0.02em;
+                white-space: normal;
+                word-break: break-word;
+                line-height: 1.4;
+            }
+
+            .badge-github {
+                background: #e7f3ff;
+                color: #0969da;
+            }
+
+            .badge-garmin {
+                background: #fff3cd;
+                color: #856404;
+            }
+
+            .badge-default {
+                background: #e9ecef;
+                color: #495057;
+            }
+
+            .domain-badge {
+                display: inline-block;
+                font-size: 0.8rem;
+                font-weight: 500;
+                padding: 0.25em 0.6em;
+                border-radius: 0.375rem;
+                background: #f1f3f4;
+                color: #5f6368;
+            }
+
+            .payload-content {
                 max-width: 100%;
-                max-height: 14rem;
                 overflow: auto;
                 white-space: pre-wrap;
                 overflow-wrap: anywhere;
                 word-break: break-word;
                 font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
                 font-size: 0.82rem;
-                line-height: 1.35;
-                background: rgba(0, 0, 0, 0.04);
+                line-height: 1.5;
+                background: #f8f9fa;
+                border: 1px solid #e9ecef;
                 border-radius: 0.375rem;
-                padding: 0.5rem;
+                padding: 0.75rem;
+                margin: 0;
+                max-height: 6rem;
+                transition: max-height 0.2s ease;
+            }
+
+            .payload-content.expanded {
+                max-height: none;
+            }
+
+            .payload-content.is-json {
+                background: #f6f8fa;
+                border-left: 3px solid #0969da;
+            }
+
+            .payload-toggle {
+                font-size: 0.75rem;
+                padding: 0.15rem 0.5rem;
+                margin-top: 0.5rem;
+            }
+
+            .date-cell {
+                font-size: 0.85rem;
+                color: #495057;
+            }
+
+            .date-cell .time-part {
+                color: #6c757d;
+                font-size: 0.8rem;
             }
         </style>
     </head>
@@ -122,16 +212,25 @@
                     <tbody>
                         <tr th:each="domainEvent : ${domainEvents}">
                             <td class="cell-id">[[${domainEvent.id}]]</td>
-                            <td class="cell-blue cell-event-type">[[${domainEvent.eventType}]]</td>
+                            <td class="cell-event-type">
+                                <span class="event-type-badge"
+                                      th:classappend="${domainEvent.eventType != null && domainEvent.eventType.toUpperCase().contains('GITHUB')} ? 'badge-github' : (${domainEvent.eventType != null && domainEvent.eventType.toUpperCase().contains('GARMIN')} ? 'badge-garmin' : 'badge-default')"
+                                      th:text="${domainEvent.eventType}">GITHUB</span>
+                            </td>
                             <td class="cell-payload">
-                                <div class="payload-content" th:text="${domainEvent.payload}"></div>
+                                <pre class="payload-content" th:data-payload="${domainEvent.payload}"
+                                     th:text="${domainEvent.payload}"></pre>
+                                <button class="btn btn-outline-secondary btn-sm payload-toggle d-none" type="button">
+                                    Show more
+                                </button>
                             </td>
                             <td class="cell-domain">
-                                <span th:if="${domainEvent.domainName != null}" class="cell-blue" th:text="${domainEvent.domainName}"></span>
+                                <span class="domain-badge" th:if="${domainEvent.domainName != null}"
+                                      th:text="${domainEvent.domainName}"></span>
                                 <span th:if="${domainEvent.domainName == null}" class="text-muted">N/A</span>
                             </td>
-                            <td class="cell-date">
-                                <span th:if="${domainEvent.dateCreated != null}" th:text="${domainEvent.dateCreated}"></span>
+                            <td class="cell-date date-cell">
+                                <span th:if="${domainEvent.dateCreated != null}" th:text="${domainEvent.dateCreated}">2026-06-21</span>
                                 <span th:if="${domainEvent.dateCreated == null}" class="text-muted">N/A</span>
                             </td>
                             <td class="cell-actions" sec:authorize="hasAuthority('ADMIN')">
@@ -195,5 +294,41 @@
                 </ul>
             </nav>
         </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.payload-content').forEach(function (pre) {
+                    const raw = pre.getAttribute('data-payload') || pre.textContent || '';
+
+                    // Try to pretty-print as JSON if the payload contains a JSON object/array
+                    let formatted = raw;
+                    let isJson = false;
+                    const jsonMatch = raw.match(/(\{.*\}|\[.*\])/s);
+                    if (jsonMatch) {
+                        try {
+                            const parsed = JSON.parse(jsonMatch[0]);
+                            formatted = raw.replace(jsonMatch[0], JSON.stringify(parsed, null, 2));
+                            isJson = true;
+                        } catch (e) {
+                            // Not valid JSON, leave as-is
+                        }
+                    }
+
+                    if (isJson) {
+                        pre.classList.add('is-json');
+                    }
+                    pre.textContent = formatted;
+
+                    // Show toggle if content overflows the max-height
+                    const toggle = pre.nextElementSibling;
+                    if (toggle && pre.scrollHeight > pre.clientHeight + 2) {
+                        toggle.classList.remove('d-none');
+                        toggle.addEventListener('click', function () {
+                            const expanded = pre.classList.toggle('expanded');
+                            toggle.textContent = expanded ? 'Show less' : 'Show more';
+                        });
+                    }
+                });
+            });
+        </script>
     </body>
 </html>
