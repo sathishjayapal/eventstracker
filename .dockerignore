@@ -2,7 +2,8 @@
 .idea
 .vscode
 .DS_Store
-target
+target/*
+!target/app.jar
 *.log
 .env
 .env.*
