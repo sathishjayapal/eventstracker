@@ -3,7 +3,7 @@
 ## Problem
 
 The eventstracker application was attempting to connect to `localhost:5672` instead of the configured RabbitMQ host
-`192.168.4.81:5672`, resulting in connection refused errors.
+`192.168.4.39:5672`, resulting in connection refused errors.
 
 ## Root Cause
 
@@ -46,7 +46,7 @@ spring:
 
 1. Ensure `jubilant-memory/config/.env` exists with:
    ```
-   RABBITMQ_HOST=192.168.4.81  (or your actual RabbitMQ host)
+   RABBITMQ_HOST=192.168.4.39  (or your actual RabbitMQ host)
    RABBITMQ_PORT=5672
    RABBITMQ_USERNAME=guest
    RABBITMQ_PASSWORD=guest
@@ -76,7 +76,7 @@ SPRING_PROFILES_ACTIVE=prod mvn spring-boot:run
 Check the Spring Boot startup logs for:
 
 ```
-Attempting to connect to: [192.168.4.81:5672]
+Attempting to connect to: [192.168.4.39:5672]
 ```
 
 ## Connection Recovery
@@ -94,15 +94,15 @@ This is normal retry behavior and will continue until RabbitMQ is available.
 ### Still connecting to localhost?
 
 1. Verify `.env` file exists: `cat .env`
-2. Verify environment variable format: `RABBITMQ_HOST=192.168.4.81` (no extra spaces)
+2. Verify environment variable format: `RABBITMQ_HOST=192.168.4.39` (no extra spaces)
 3. Rebuild the project: `mvn clean compile`
 4. Restart the application
 
 ### Connection refused despite correct host?
 
-1. Verify RabbitMQ is running on `192.168.4.81:5672`:
+1. Verify RabbitMQ is running on `192.168.4.39:5672`:
    ```bash
-   nc -zv 192.168.4.81 5672
+   nc -zv 192.168.4.39 5672
    ```
 2. Check RabbitMQ credentials: `guest/guest`
 3. Verify network connectivity to the host
@@ -110,7 +110,7 @@ This is normal retry behavior and will continue until RabbitMQ is available.
 ### Verify credentials with RabbitMQ
 
 ```bash
-# If RabbitMQ is running locally on 192.168.4.81
+# If RabbitMQ is running locally on 192.168.4.39
 docker exec <rabbitmq-container> rabbitmqctl list_users
 ```
 
