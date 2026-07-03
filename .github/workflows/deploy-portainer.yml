@@ -1,12 +1,12 @@
-name: CI/CD → Docker Hub (VirtualBox / Portainer)
+name: CI/CD → Docker Hub
 
-# Pushes a fresh :latest image to Docker Hub on every merge to main.
-# Watchtower running inside the VirtualBox VM polls Docker Hub every 5 min
-# and restarts eventstracker automatically — no webhook or open port needed.
+# Builds eventstracker and pushes a fresh :latest image to Docker Hub on every
+# push to the default branch. Watchtower running in the VirtualBox / Portainer
+# VM polls Docker Hub every 5 min and redeploys automatically.
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
 
 permissions:
@@ -16,9 +16,8 @@ env:
   IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/eventstracker
 
 jobs:
-  # ── Build ─────────────────────────────────────────────────────────────────
-  build:
-    name: Build
+  publish:
+    name: Build & push image
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,39 +29,18 @@ jobs:
           distribution: temurin
           cache: maven
 
-      # eventstracker depends on sathishlogger as a local SNAPSHOT.
-      # Clone and install it into the local Maven repo before building.
-      - name: Install sathishlogger dependency
+      # eventstracker depends on com.sathish:sathish-projects-logger as a local
+      # SNAPSHOT, which is not on Maven Central. Build & install it first.
+      - name: Install sathish-projects-logger dependency
         run: |
-          git clone https://github.com/${{ github.repository_owner }}/sathishlogger.git /tmp/sathishlogger
+          git clone --depth 1 https://github.com/${{ github.repository_owner }}/sathishlogger.git /tmp/sathishlogger
           cd /tmp/sathishlogger
-          mvn install -DskipTests -B
+          ./mvnw install -DskipTests -B || mvn install -DskipTests -B
 
       - name: Build eventstracker (skip tests)
         run: |
           ./mvnw package -DskipTests -B
           mv target/*.jar target/app.jar
-
-      - name: Upload JAR
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-jar
-          path: target/app.jar
-          retention-days: 1
-
-  # ── Docker push ───────────────────────────────────────────────────────────
-  docker:
-    name: Docker push
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download JAR
-        uses: actions/download-artifact@v4
-        with:
-          name: app-jar
-          path: target/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -90,26 +68,3 @@ jobs:
           echo "- **Image**: \`${{ env.IMAGE_NAME }}:latest\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- **SHA tag**: \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- **Watchtower** will auto-redeploy in ≤ 5 min" >> "$GITHUB_STEP_SUMMARY"
-
-  # ── Notify on failure ─────────────────────────────────────────────────────
-  notify-on-failure:
-    name: Notify on failure
-    if: failure()
-    runs-on: ubuntu-latest
-    needs: [ build, docker ]
-    steps:
-      - name: Send failure email
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "[eventstracker] Docker push failed - ${{ github.workflow }}"
-          to: ${{ secrets.ALERT_EMAIL_TO }}
-          from: ${{ secrets.ALERT_EMAIL_FROM }}
-          body: |
-            Workflow: ${{ github.workflow }}
-            Branch: ${{ github.ref_name }}
-            Commit: ${{ github.sha }}
-            Run URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
