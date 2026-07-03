@@ -33,8 +33,8 @@ jobs:
       # SNAPSHOT, which is not on Maven Central. Build & install it first.
       - name: Install sathish-projects-logger dependency
         run: |
-          git clone --depth 1 https://github.com/${{ github.repository_owner }}/sathishlogger.git /tmp/sathishlogger
-          cd /tmp/sathishlogger
+          git clone --depth 1 https://github.com/${{ github.repository_owner }}/sathish-projects-logger.git /tmp/sathish-projects-logger
+          cd /tmp/sathish-projects-logger
           ./mvnw install -DskipTests -B || mvn install -DskipTests -B
 
       - name: Build eventstracker (skip tests)
