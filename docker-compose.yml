@@ -1,0 +1,26 @@
+# Standalone DB compose for eventstracker — same values as the shared
+# jubilant-memory/config/docker-compose.yml definition (canonical for
+# multi-project local dev via dev-up.sh). Use this when you only need
+# the eventstracker database by itself:
+#   docker compose up -d
+# Reads EVENTS_TRACKER_DB_* from ./.env (created by dev-up.sh).
+services:
+  postgres:
+    container_name: event-service-db
+    image: postgres:17.5
+    environment:
+      - POSTGRES_DB=${EVENTS_TRACKER_DB_NAME:-event-service}
+      - POSTGRES_USER=${EVENTS_TRACKER_DB_USER:?set in .env}
+      - POSTGRES_PASSWORD=${EVENTS_TRACKER_DB_PASSWORD:?set in .env}
+    ports:
+      - 6433:5432
+    volumes:
+      - event_service_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${EVENTS_TRACKER_DB_USER} -d ${EVENTS_TRACKER_DB_NAME:-event-service}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  event_service_pg_data:
