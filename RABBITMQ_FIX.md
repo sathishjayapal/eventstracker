@@ -38,13 +38,13 @@ spring:
 
 - Spring Boot loads the `.env` file via: `spring.config.import: optional:file:.env[.properties]`
 - Environment variables from `.env` are resolved in the YAML files using `${VARIABLE_NAME:default}`
-- The `dev-up.sh` script automatically generates the `.env` file with correct values from `jubilant-memory/config/.env`
+- The `dev-up.sh` script automatically generates the `.env` file with correct values from `consolidated-postgres/env/.env.local`
 
 ## How to Use
 
 ### Prerequisites
 
-1. Ensure `jubilant-memory/config/.env` exists with:
+1. Ensure `consolidated-postgres/env/.env.local` exists with:
    ```
    RABBITMQ_HOST=192.168.4.94  (or your actual RabbitMQ host)
    RABBITMQ_PORT=5672

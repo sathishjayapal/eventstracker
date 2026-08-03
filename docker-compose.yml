@@ -1,5 +1,5 @@
 # Standalone DB compose for eventstracker — same values as the shared
-# jubilant-memory/config/docker-compose.yml definition (canonical for
+# consolidated-postgres/compose/docker-compose-local.yml definition (canonical for
 # multi-project local dev via dev-up.sh). Use this when you only need
 # the eventstracker database by itself:
 #   docker compose up -d
