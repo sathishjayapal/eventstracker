@@ -1,6 +1,8 @@
 package me.sathish.event_service.jobs;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import me.sathish.event_service.config.RabbitSchemaConfig;
 import me.sathish.event_service.domain.DomainConstants;
@@ -119,6 +121,35 @@ public class ProcessRabbitMQEvents {
     private DomainEvent saveIncomingEvent(DomainEventDTO domainEventDTO) {
         final DomainEvent domainEvent = domainEventMapper.updateDomainEvent(domainEventDTO, new DomainEvent());
         return domainEventRepository.save(domainEvent);
+    }
+
+    @RabbitListener(queues = RabbitSchemaConfig.DLQ_GARMIN_API_EVENTS_QUEUE)
+    public void processGarminDlqEvents(Message message) {
+        String payload = message == null ? "" : new String(message.getBody(), StandardCharsets.UTF_8);
+        Map<String, Object> headers = message.getMessageProperties().getHeaders();
+
+        // x-death is a list of maps added by RabbitMQ, one entry per death cycle
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> xDeath = (List<Map<String, Object>>) headers.get("x-death");
+        String reason = "unknown";
+        String sourceQueue = "unknown";
+        long deathCount = 1;
+        if (xDeath != null && !xDeath.isEmpty()) {
+            Map<String, Object> firstDeath = xDeath.get(0);
+            reason = String.valueOf(firstDeath.getOrDefault("reason", "unknown"));
+            sourceQueue = String.valueOf(firstDeath.getOrDefault("queue", "unknown"));
+            deathCount = (long) firstDeath.getOrDefault("count", 1L);
+        }
+
+        log.error(
+            "DEAD_LETTER_ALERT [garmin-api] reason={} source={} deaths={} payload={}",
+            reason, sourceQueue, deathCount, payload);
+    }
+
+    @RabbitListener(queues = RabbitSchemaConfig.DLQ_GITHUB_API_EVENTS_QUEUE)
+    public void processGithubDlqEvents(Message message) {
+        String payload = message == null ? "" : new String(message.getBody(), StandardCharsets.UTF_8);
+        log.error("DEAD_LETTER_ALERT [github-api] payload={}", payload);
     }
 
     private DomainEventDTO createDomainEventDTOFromString(String payload) {
