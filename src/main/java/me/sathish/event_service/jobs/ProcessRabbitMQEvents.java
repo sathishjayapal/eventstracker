@@ -142,8 +142,11 @@ public class ProcessRabbitMQEvents {
         }
 
         log.error(
-            "DEAD_LETTER_ALERT [garmin-api] reason={} source={} deaths={} payload={}",
-            reason, sourceQueue, deathCount, payload);
+                "DEAD_LETTER_ALERT [garmin-api] reason={} source={} deaths={} payload={}",
+                reason,
+                sourceQueue,
+                deathCount,
+                payload);
     }
 
     @RabbitListener(queues = RabbitSchemaConfig.DLQ_GITHUB_API_EVENTS_QUEUE)
