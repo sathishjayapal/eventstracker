@@ -84,9 +84,8 @@ public class ProcessRabbitMQEvents {
     @RabbitListener(queues = RabbitSchemaConfig.GARMIN_API_EVENTS_QUEUE)
     public void processGarminEvents(Message message) {
         String eventPayload = message == null ? null : new String(message.getBody(), StandardCharsets.UTF_8);
-        String correlationId = message == null
-                ? null
-                : message.getMessageProperties().getCorrelationId();
+        String correlationId =
+                message == null ? null : message.getMessageProperties().getCorrelationId();
         if (correlationId == null || correlationId.isBlank()) {
             correlationId = UUID.randomUUID().toString();
         }
@@ -187,7 +186,9 @@ public class ProcessRabbitMQEvents {
             deathCount = (long) firstDeath.getOrDefault("count", 1L);
         }
 
-        MDC.put(CorrelationIdFilter.MDC_KEY, correlationId == null ? UUID.randomUUID().toString() : correlationId);
+        MDC.put(
+                CorrelationIdFilter.MDC_KEY,
+                correlationId == null ? UUID.randomUUID().toString() : correlationId);
         try {
             log.error(
                     "DEAD_LETTER_ALERT [garmin-api] reason={} source={} deaths={} payload={}",
