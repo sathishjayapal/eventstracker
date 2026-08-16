@@ -37,6 +37,13 @@ public class RabbitSchemaConfig {
 
     public static final int MESSAGE_TTL_MS = 10000;
 
+    // Garmin queues are a durable audit trail — they must survive a normal eventstracker
+    // restart/redeploy without silently dead-lettering whatever was in flight. 24h comfortably
+    // covers routine downtime while still acting as a circuit breaker if the consumer is broken
+    // for an extended period. Scoped to Garmin only so GitHub's queues (and their consumer) are
+    // untouched by this change.
+    public static final int GARMIN_MESSAGE_TTL_MS = 24 * 60 * 60 * 1000;
+
     @Bean
     public Declarables declarables() {
         // Exchanges
@@ -74,12 +81,12 @@ public class RabbitSchemaConfig {
         // Garmin domain queues
         Queue garminApiEventsQueue = QueueBuilder.durable(GARMIN_API_EVENTS_QUEUE)
                 .withArgument("x-dead-letter-exchange", GARMIN_EVENTS_DLX_EXCHANGE)
-                .withArgument("x-message-ttl", MESSAGE_TTL_MS)
+                .withArgument("x-message-ttl", GARMIN_MESSAGE_TTL_MS)
                 .withArgument("x-dead-letter-routing-key", GARMIN_API_ROUTING_KEY)
                 .build();
         Queue garminOpsEventsQueue = QueueBuilder.durable(GARMIN_OPS_EVENTS_QUEUE)
                 .withArgument("x-dead-letter-exchange", GARMIN_EVENTS_DLX_EXCHANGE)
-                .withArgument("x-message-ttl", MESSAGE_TTL_MS)
+                .withArgument("x-message-ttl", GARMIN_MESSAGE_TTL_MS)
                 .withArgument("x-dead-letter-routing-key", GARMIN_OPS_ROUTING_KEY)
                 .build();
         Queue dlqGarminApiEventsQueue =

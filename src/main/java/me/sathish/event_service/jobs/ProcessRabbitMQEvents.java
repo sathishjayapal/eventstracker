@@ -1,9 +1,13 @@
 package me.sathish.event_service.jobs;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import me.sathish.event_service.config.CorrelationIdFilter;
 import me.sathish.event_service.config.RabbitSchemaConfig;
 import me.sathish.event_service.domain.DomainConstants;
 import me.sathish.event_service.domain.DomainLookupService;
@@ -11,6 +15,9 @@ import me.sathish.event_service.domain_event.DomainEvent;
 import me.sathish.event_service.domain_event.DomainEventDTO;
 import me.sathish.event_service.domain_event.DomainEventMapper;
 import me.sathish.event_service.domain_event.DomainEventRepository;
+import me.sathish.event_service.failed_event.FailedEvent;
+import me.sathish.event_service.failed_event.FailedEventRepository;
+import org.slf4j.MDC;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -22,16 +29,22 @@ public class ProcessRabbitMQEvents {
     private final DomainEventRepository domainEventRepository;
     private final DomainEventMapper domainEventMapper;
     private final DomainLookupService domainLookupService;
+    private final FailedEventRepository failedEventRepository;
+    private final ObjectMapper objectMapper;
     private final java.util.Set<DomainEventDTO> processedEvents =
             java.util.Collections.newSetFromMap(new java.util.concurrent.ConcurrentHashMap<>());
 
     public ProcessRabbitMQEvents(
             DomainEventRepository domainEventRepository,
             DomainEventMapper domainEventMapper,
-            DomainLookupService domainLookupService) {
+            DomainLookupService domainLookupService,
+            FailedEventRepository failedEventRepository,
+            ObjectMapper objectMapper) {
         this.domainEventRepository = domainEventRepository;
         this.domainEventMapper = domainEventMapper;
         this.domainLookupService = domainLookupService;
+        this.failedEventRepository = failedEventRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional
@@ -71,46 +84,78 @@ public class ProcessRabbitMQEvents {
     @RabbitListener(queues = RabbitSchemaConfig.GARMIN_API_EVENTS_QUEUE)
     public void processGarminEvents(Message message) {
         String eventPayload = message == null ? null : new String(message.getBody(), StandardCharsets.UTF_8);
-        if (eventPayload == null || eventPayload.isBlank()) {
-            log.error("Received null payload from Garmin queue, skipping processing.");
-            return;
+        String correlationId = message == null
+                ? null
+                : message.getMessageProperties().getCorrelationId();
+        if (correlationId == null || correlationId.isBlank()) {
+            correlationId = UUID.randomUUID().toString();
         }
-
-        log.info("=== Received Garmin event from RabbitMQ ===");
-        log.info("Event payload: {}", eventPayload);
-
+        MDC.put(CorrelationIdFilter.MDC_KEY, correlationId);
         try {
-            // Create a DomainEventDTO from the string payload
-            final DomainEventDTO garminEventDTO = createDomainEventDTOFromString(eventPayload);
+            if (eventPayload == null || eventPayload.isBlank()) {
+                log.error("Received null payload from Garmin queue, skipping processing.");
+                return;
+            }
 
-            // Save the incoming event to repository
-            final DomainEvent savedEvent = saveIncomingEvent(garminEventDTO);
-            log.info(
-                    "Persisted Garmin event payload for EventId={} as DB record ID={}",
-                    garminEventDTO.getEventId(),
-                    savedEvent.getId());
+            log.info("=== Received Garmin event from RabbitMQ ===");
+            log.info("Event payload: {}", eventPayload);
 
-            // Add to processed events tracking
-            processedEvents.add(garminEventDTO);
-            log.info("Total processed Garmin events count from queue: {}", processedEvents.size());
+            try {
+                // Create a DomainEventDTO from the string payload
+                final DomainEventDTO garminEventDTO = createDomainEventDTOFromString(eventPayload);
 
-            // Process the Garmin event
-            processGarminRunEventFromString(eventPayload);
-        } catch (RuntimeException ex) {
-            log.error("Failed to persist Garmin event payload: {}", eventPayload, ex);
+                // Save the incoming event to repository
+                final DomainEvent savedEvent = saveIncomingEvent(garminEventDTO);
+                log.info(
+                        "Persisted Garmin event payload for EventId={} as DB record ID={}",
+                        garminEventDTO.getEventId(),
+                        savedEvent.getId());
+
+                // Add to processed events tracking
+                processedEvents.add(garminEventDTO);
+                log.info("Total processed Garmin events count from queue: {}", processedEvents.size());
+
+                // Process the Garmin event
+                processGarminRunEventFromString(eventPayload);
+            } catch (RuntimeException ex) {
+                log.error("Failed to persist Garmin event payload: {}", eventPayload, ex);
+            }
+        } finally {
+            MDC.remove(CorrelationIdFilter.MDC_KEY);
         }
     }
 
-    private void processGarminRunEvent(DomainEventDTO domainEventDTO) {
-        log.info("Processing Garmin run event with payload: {}", domainEventDTO.getPayload());
-        // Add specific Garmin run processing logic here
-    }
-
+    /**
+     * Surfaces status-carrying Garmin events (failures, skips, partial/failed import batches) at
+     * WARN so they ship to sathishlogger; routine SUCCESS/UPDATED traffic stays at INFO (local only).
+     */
     private void processGarminRunEventFromString(String payload) {
-        log.info("Processing Garmin run event from String payload: {}", payload);
+        try {
+            Map<String, Object> parsed = objectMapper.readValue(payload, new TypeReference<Map<String, Object>>() {});
+            String eventType = String.valueOf(parsed.getOrDefault("eventType", "UNKNOWN"));
+            String status = String.valueOf(parsed.getOrDefault("status", "UNKNOWN"));
+            String fileName = String.valueOf(parsed.getOrDefault("fileName", ""));
+            String activityId = String.valueOf(parsed.getOrDefault("activityId", ""));
+            String errorMessage = String.valueOf(parsed.getOrDefault("errorMessage", ""));
 
-        // Add specific Garmin run processing logic here
-        // You can parse the JSON payload if it's a GarminRunEvent object
+            if ("GARMIN_CSV_SUMMARY".equals(eventType)) {
+                if ("PARTIAL".equalsIgnoreCase(status) || "FAILED".equalsIgnoreCase(status)) {
+                    log.warn("GARMIN_IMPORT_SUMMARY status={} file={} detail={}", status, fileName, errorMessage);
+                } else {
+                    log.info("GARMIN_IMPORT_SUMMARY status={} file={} detail={}", status, fileName, errorMessage);
+                }
+            } else if ("FAILED".equalsIgnoreCase(status)) {
+                log.warn(
+                        "GARMIN_RUN_EVENT status=FAILED activityId={} file={} error={}",
+                        activityId,
+                        fileName,
+                        errorMessage);
+            } else {
+                log.info("GARMIN_RUN_EVENT status={} activityId={} file={}", status, activityId, fileName);
+            }
+        } catch (Exception e) {
+            log.warn("Could not parse Garmin event payload for status-based logging: {}", payload, e);
+        }
     }
 
     private void processGitHubRepoEvent(DomainEventDTO domainEventDTO) {
@@ -127,6 +172,7 @@ public class ProcessRabbitMQEvents {
     public void processGarminDlqEvents(Message message) {
         String payload = message == null ? "" : new String(message.getBody(), StandardCharsets.UTF_8);
         Map<String, Object> headers = message.getMessageProperties().getHeaders();
+        String correlationId = message.getMessageProperties().getCorrelationId();
 
         // x-death is a list of maps added by RabbitMQ, one entry per death cycle
         @SuppressWarnings("unchecked")
@@ -141,12 +187,30 @@ public class ProcessRabbitMQEvents {
             deathCount = (long) firstDeath.getOrDefault("count", 1L);
         }
 
-        log.error(
-                "DEAD_LETTER_ALERT [garmin-api] reason={} source={} deaths={} payload={}",
-                reason,
-                sourceQueue,
-                deathCount,
-                payload);
+        MDC.put(CorrelationIdFilter.MDC_KEY, correlationId == null ? UUID.randomUUID().toString() : correlationId);
+        try {
+            log.error(
+                    "DEAD_LETTER_ALERT [garmin-api] reason={} source={} deaths={} payload={}",
+                    reason,
+                    sourceQueue,
+                    deathCount,
+                    payload);
+
+            try {
+                FailedEvent failedEvent = new FailedEvent();
+                failedEvent.setSourceQueue(sourceQueue);
+                failedEvent.setEventType("GARMIN");
+                failedEvent.setPayload(payload);
+                failedEvent.setFailureReason(reason);
+                failedEvent.setCorrelationId(correlationId);
+                failedEvent.setDeathCount(deathCount);
+                failedEventRepository.save(failedEvent);
+            } catch (RuntimeException ex) {
+                log.error("Failed to persist dead-lettered Garmin event to failed_event table", ex);
+            }
+        } finally {
+            MDC.remove(CorrelationIdFilter.MDC_KEY);
+        }
     }
 
     @RabbitListener(queues = RabbitSchemaConfig.DLQ_GITHUB_API_EVENTS_QUEUE)
