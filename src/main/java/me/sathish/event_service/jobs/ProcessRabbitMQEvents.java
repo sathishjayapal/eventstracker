@@ -117,7 +117,7 @@ public class ProcessRabbitMQEvents {
                 // Process the Garmin event
                 processGarminRunEventFromString(eventPayload);
             } catch (RuntimeException ex) {
-                log.error("Failed to persist Garmin event payload: {}", eventPayload, ex);
+                log.error("Failed to persist Garmin event payload: {}", eventPayload, ex.fillInStackTrace());
             }
         } finally {
             MDC.remove(CorrelationIdFilter.MDC_KEY);
@@ -207,7 +207,7 @@ public class ProcessRabbitMQEvents {
                 failedEvent.setDeathCount(deathCount);
                 failedEventRepository.save(failedEvent);
             } catch (RuntimeException ex) {
-                log.error("Failed to persist dead-lettered Garmin event to failed_event table", ex);
+                log.error("Failed to persist dead-lettered Garmin event to failed_event table", ex.fillInStackTrace());
             }
         } finally {
             MDC.remove(CorrelationIdFilter.MDC_KEY);
