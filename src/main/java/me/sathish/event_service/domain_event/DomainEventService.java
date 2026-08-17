@@ -85,15 +85,13 @@ public class DomainEventService {
 
     private void publishDomainEventMessage(final DomainEventDTO domainEventDTO) throws Exception {
         try {
-            log.error("Exchanging domain event message to RabbitMQ"
-                    + applicationProperties.sathishProjectEventsExchange());
-            for (int i = 0; i < 10; i++) {
-                rabbitTemplate.convertAndSend(
-                        applicationProperties.sathishProjectEventsExchange(),
-                        applicationProperties.githubRoutingKey(),
-                        domainEventDTO);
-            }
-
+            log.debug(
+                    "Publishing domain event message to RabbitMQ exchange {}",
+                    applicationProperties.sathishProjectEventsExchange());
+            rabbitTemplate.convertAndSend(
+                    applicationProperties.sathishProjectEventsExchange(),
+                    applicationProperties.githubRoutingKey(),
+                    domainEventDTO);
         } catch (Exception e) {
             log.error("Failed to publish domain event message: " + e.getMessage());
             throw new RuntimeException("Failed to publish domain event message", e);
