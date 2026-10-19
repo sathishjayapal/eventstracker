@@ -1,0 +1,192 @@
+name: CI/CD
+
+# Same job graph as runs-app: test -> (sonar) -> image build + Trivy gate -> publish to GHCR.
+# Pull requests run everything except publish, so the image build and CVE scan are checked
+# before merge. Only pushes to master (or a manual dispatch there) publish. The VM's Watchtower
+# polls GHCR and redeploys the new :latest within ~5 minutes.
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+          cache: maven
+
+      # Surefire's defaults skip *IT classes and the pom has no Failsafe plugin, so name every
+      # test class pattern explicitly. The Spotless check is bound to the validate phase, so
+      # formatting violations fail here. Docker is preinstalled on ubuntu-latest, which the
+      # Testcontainers-backed tests (Postgres, RabbitMQ) need.
+      - name: Run tests
+        run: ./mvnw -B test -Dtest='*Test,*Tests,*IT' -Dsurefire.failIfNoSpecifiedTests=false
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
+          retention-days: 7
+
+  # Skipped (with a notice) until a SONAR_TOKEN secret exists, so adding SonarCloud later is
+  # just: create the project in SonarCloud, add the secret. The quality gate is not enforced
+  # yet (no coverage data is collected); tighten with -Dsonar.qualitygate.wait=true once a
+  # baseline exists.
+  sonar:
+    name: SonarCloud
+    needs: test
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - name: Skip notice
+        if: env.SONAR_TOKEN == ''
+        run: echo "::notice::SONAR_TOKEN is not set, skipping the SonarCloud scan"
+
+      - uses: actions/checkout@v4
+        if: env.SONAR_TOKEN != ''
+        with:
+          fetch-depth: 0   # Sonar needs full history for new-code and blame analysis
+
+      - uses: actions/setup-java@v4
+        if: env.SONAR_TOKEN != ''
+        with:
+          java-version: "21"
+          distribution: temurin
+          cache: maven
+
+      - name: SonarCloud scan
+        if: env.SONAR_TOKEN != ''
+        run: |
+          ./mvnw -B package -DskipTests \
+            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=eventstracker \
+            -Dsonar.organization=dotsky \
+            -Dsonar.host.url=https://sonarcloud.io
+
+  image:
+    name: Build image and scan
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      # Build only (no push): the image must pass Trivy before anything is published.
+      # amd64 only here; the published image adds arm64 from the same Dockerfile and cache.
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: eventstracker:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Trivy vulnerability scan (CRITICAL only, fails the build)
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy image \
+            --severity CRITICAL \
+            --exit-code 1 \
+            --ignore-unfixed \
+            eventstracker:scan
+
+      - name: Trivy report (all severities, for visibility)
+        if: always()
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy image \
+            --format table \
+            --ignore-unfixed \
+            eventstracker:scan || true
+
+  publish:
+    name: Publish to GHCR
+    needs: [ test, sonar, image ]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=,format=long
+            type=raw,value=latest
+
+      # amd64 for the runs-server VM, arm64 for the Macs that run the same stack under
+      # Docker Desktop. Layers are shared with the scanned build through the GHA cache.
+      - name: Build and push (multi-arch)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Record GitHub Deployment
+        uses: chrnorm/deployment-action@v2
+        id: deployment
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: runs-server
+          description: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Mark deployment successful
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          state: success
+
+      - name: Write summary
+        run: |
+          {
+            echo "## Image published"
+            echo "- **Image**: \`${{ env.IMAGE_NAME }}:latest\`"
+            echo "- **SHA tag**: \`${{ github.sha }}\`"
+            echo "- **Watchtower** on the VM will redeploy within ~5 minutes"
+            echo "- First publish only: set the package to **public** (Packages -> eventstracker -> Package settings), the VM pulls without credentials"
+          } >> "$GITHUB_STEP_SUMMARY"
