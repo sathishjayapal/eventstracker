@@ -108,13 +108,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # .trivyignore holds the reviewed, expiring exceptions (see the reasons in that file).
       - name: Trivy vulnerability scan (CRITICAL only, fails the build)
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$PWD/.trivyignore:/.trivyignore:ro" \
             aquasec/trivy image \
             --severity CRITICAL \
             --exit-code 1 \
             --ignore-unfixed \
+            --ignorefile /.trivyignore \
             eventstracker:scan
 
       - name: Trivy report (all severities, for visibility)
