@@ -1,9 +1,9 @@
 .git
+.github
 .idea
 .vscode
 .DS_Store
-target/*
-!target/app.jar
+target
 *.log
 .env
 .env.*
