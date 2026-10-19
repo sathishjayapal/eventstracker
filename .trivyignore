@@ -1,0 +1,13 @@
+# Accepted risks for the Trivy CRITICAL gate in .github/workflows/ci-cd.yml.
+# Each entry needs a reason and an expiry; after the date the entry is ignored by Trivy and the
+# gate fails again, which forces a re-review instead of letting an exception live forever.
+
+# spring-webmvc 6.2.19 (managed by Spring Boot 3.5.16, the newest 3.5.x/6.2.x).
+# Fixed ONLY in Spring Framework 7.0.9 (Spring Boot 4); no 6.2.x patch exists.
+#  - CVE-2026-47884: RCE/SSRF via XsltView with a "/**" mapping and no explicit view name.
+#  - CVE-2026-47890: stream corruption for Server-Sent Events with view fragments.
+# Not reachable here: eventstracker uses no XsltView/XSLT, no SSE endpoints, and no catch-all
+# "/**" mapping (checked 2026-10-19). Real fix: migrate to Spring Boot 4 (runs-app is on 4.0.1).
+# Accepted by: sathishjayapal on 2026-10-19. Review by the expiry below.
+CVE-2026-47884 exp:2027-01-31
+CVE-2026-47890 exp:2027-01-31
