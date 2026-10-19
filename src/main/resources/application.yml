@@ -8,6 +8,20 @@ spring:
         skip: if_running
       lifecycle-management: none
 
+# Console logging. Replaces the old custom logback-spring.xml: Boot's importable
+# console-appender.xml ignores logging.structured.format.console, so keeping that file would
+# make JSON logs impossible. Locally this prints the readable pattern (with the correlation ID
+# set by CorrelationIdFilter / ProcessRabbitMQEvents). On the VM, set
+# LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs to emit one JSON object per line instead (MDC entries,
+# including correlationId, become JSON fields); the pattern is then unused.
+logging:
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}){faint} %clr(%5p) %clr([%X{correlationId:-}]){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"
+  level:
+    root: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+
 # Common defaults - environment-specific configs loaded from config server
 springdoc:
   pathsToMatch: /api/**

@@ -29,8 +29,14 @@ public class EventDomainUserDataLoader implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        String username = environment.getProperty("EVENT_DOMAIN_USER");
-        String password = environment.getProperty("EVENT_DOMAIN_USER_PASSWORD");
+        // Read the same property DomainDataLoader uses (eventDomainUser). In deployed environments
+        // config-server maps it to ${EVENT_DOMAIN_USER}; reading the raw env var alone made the two
+        // loaders disagree whenever a test overrode the property.
+        String username =
+                firstNonBlank(environment.getProperty("eventDomainUser"), environment.getProperty("EVENT_DOMAIN_USER"));
+        String password = firstNonBlank(
+                environment.getProperty("eventDomainUserPassword"),
+                environment.getProperty("EVENT_DOMAIN_USER_PASSWORD"));
         if (username == null || password == null) {
             throw new IllegalStateException("eventDomainUser and eventDomainUserPassword properties must not be null");
         }
@@ -48,5 +54,9 @@ public class EventDomainUserDataLoader implements ApplicationRunner {
         user.setHash(passwordEncoder.encode(password));
         eventDomainUserRepository.saveAndFlush(user);
         log.info("Created Event Domain User '{}'", username);
+    }
+
+    private static String firstNonBlank(String preferred, String fallback) {
+        return preferred != null && !preferred.isBlank() ? preferred : fallback;
     }
 }

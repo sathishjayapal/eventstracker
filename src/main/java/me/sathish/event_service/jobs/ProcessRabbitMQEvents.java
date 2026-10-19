@@ -126,7 +126,7 @@ public class ProcessRabbitMQEvents {
 
     /**
      * Surfaces status-carrying Garmin events (failures, skips, partial/failed import batches) at
-     * WARN so they ship to sathishlogger; routine SUCCESS/UPDATED traffic stays at INFO (local only).
+     * WARN so they stand out in the log stream (Loki/Grafana); routine SUCCESS/UPDATED traffic stays at INFO.
      */
     private void processGarminRunEventFromString(String payload) {
         try {

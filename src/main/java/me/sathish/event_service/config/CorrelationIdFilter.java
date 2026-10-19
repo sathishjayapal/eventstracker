@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Puts a correlation ID into the MDC for every HTTP request so the
- * SathishLoggerAppender can forward it to the central sathishlogger service.
+ * Puts a correlation ID into the MDC for every HTTP request so it appears on every log line
+ * (as a JSON field when structured logging is on) and can be searched across services.
  * Honors an incoming X-Correlation-ID header (from upstream services),
  * otherwise generates a new one, and echoes it back on the response.
  */

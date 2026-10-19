@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -42,6 +44,14 @@ class DomainEventControllerIT {
     void setUp() {
         when(domainRepository.findAll(any(Sort.class))).thenReturn(List.of());
         when(domainEventService.findAll()).thenReturn(List.of());
+        // The list page calls findAllPaged(...); an unstubbed mock returns null for the Page and
+        // Thymeleaf then fails on "domainEvents.empty". One row so the admin edit/delete links render.
+        final DomainEventDTO row = new DomainEventDTO();
+        row.setId(1100L);
+        row.setEventId("evt-1100");
+        row.setEventType("TEST");
+        row.setPayload("{}");
+        when(domainEventService.findAllPaged(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(row)));
     }
 
     @Test
