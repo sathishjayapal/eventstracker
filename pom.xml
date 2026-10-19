@@ -17,6 +17,8 @@
         <java.version>21</java.version>
         <spotless.version>2.40.0</spotless.version>
         <spring-cloud.version>2025.0.1</spring-cloud.version>
+        <!-- Boot 3.5.7 manages 1.21.3, which gets HTTP 400 from Docker 29+ (min API 1.44). -->
+        <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
 
     <dependencyManagement>
@@ -170,6 +172,13 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
+        </dependency>
+        <!-- Was only ever on the classpath transitively via sathish-projects-logger. Removing that
+             dependency made DomainEventControllerIT/LoginDebugTest regress (404 / circular redirect),
+             so it is declared explicitly. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
     </dependencies>
 
