@@ -1,6 +1,8 @@
 name: CI/CD
 
-# Same job graph as runs-app: test -> (sonar) -> image build + Trivy gate -> publish to GHCR.
+# Same job graph as runs-app minus Sonar: test -> image build + Trivy gate -> publish to GHCR.
+# Code analysis is done by SonarCloud automatic analysis (the "SonarCloud Code Analysis" PR check),
+# not by a job here: SonarCloud does not allow automatic analysis and a CI scan at the same time.
 # Pull requests run everything except publish, so the image build and CVE scan are checked
 # before merge. Only pushes to master (or a manual dispatch there) publish. The VM's Watchtower
 # polls GHCR and redeploys the new :latest within ~5 minutes.
@@ -52,52 +54,35 @@ jobs:
           path: target/surefire-reports/
           retention-days: 7
 
-  # Skipped (with a notice) until a SONAR_TOKEN secret exists, so adding SonarCloud later is
-  # just: create the project in SonarCloud, add the secret. The quality gate is not enforced
-  # yet (no coverage data is collected); tighten with -Dsonar.qualitygate.wait=true once a
-  # baseline exists.
-  sonar:
-    name: SonarCloud
-    needs: test
-    runs-on: ubuntu-latest
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    steps:
-      - name: Skip notice
-        if: env.SONAR_TOKEN == ''
-        run: echo "::notice::SONAR_TOKEN is not set, skipping the SonarCloud scan"
-
-      - uses: actions/checkout@v4
-        if: env.SONAR_TOKEN != ''
-        with:
-          fetch-depth: 0   # Sonar needs full history for new-code and blame analysis
-
-      - uses: actions/setup-java@v4
-        if: env.SONAR_TOKEN != ''
-        with:
-          java-version: "21"
-          distribution: temurin
-          cache: maven
-
-      - name: SonarCloud scan
-        if: env.SONAR_TOKEN != ''
-        run: |
-          ./mvnw -B package -DskipTests \
-            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=eventstracker \
-            -Dsonar.organization=dotsky \
-            -Dsonar.host.url=https://sonarcloud.io
-
-  image:
-    name: Build image and scan
+  image-build:
+    name: Build image
     needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
 
-      # Build only (no push): the image must pass Trivy before anything is published.
+      # Build only (no push): validates the image builds and warms the gha cache.
       # amd64 only here; the published image adds arm64 from the same Dockerfile and cache.
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: eventstracker:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  scan:
+    name: Trivy scan
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      # Build locally for scanning — shares the gha cache with image-build.
       - name: Build image
         uses: docker/build-push-action@v6
         with:
@@ -131,7 +116,7 @@ jobs:
 
   publish:
     name: Publish to GHCR
-    needs: [ test, sonar, image ]
+    needs: [ test, image-build, scan ]
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
